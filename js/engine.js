@@ -160,7 +160,7 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
+        
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -172,7 +172,8 @@ var Engine = (function(global) {
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
-        'images/char-boy.png'
+        'images/char-boy.png',
+		'images/star.png'
     ]);
     Resources.onReady(init);
 
