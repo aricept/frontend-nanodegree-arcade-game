@@ -64,7 +64,8 @@ var Engine = (function(global) {
      * game loop.
      */
     function init() {
-        reset("init");
+        reset();
+		initLoad();
         lastTime = Date.now();
         main();
     }
@@ -107,7 +108,7 @@ var Engine = (function(global) {
         /* This array holds the relative URL to the image used
          * for that particular row of the game level.
          */
-		 if (init === false) {
+		if (play === true) {
         var rowImages = [
                 'images/water-block.png',   // Top row is water
                 'images/stone-block.png',   // Row 1 of 3 of stone
@@ -140,6 +141,9 @@ var Engine = (function(global) {
 
         renderEntities();
 		}
+		else {
+			loadRender();
+		}
     }
 
     /* This function is called by the render function and is called on each game
@@ -156,18 +160,33 @@ var Engine = (function(global) {
 
         player.render();
     }
+	
+	function loadRender() {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		for (col = 0; col <5; col++) {
+				ctx.drawImage(Resources.get("images/stone-block.png"), col * 101, 249);
+			}
+		for (var i = 0; i < chars.length; i++) {
+			ctx.drawImage(Resources.get(chars[i]), i * 101, 230);
+		}
+		selector.render();
+	}
 
     /* This function does nothing but it could have been a good place to
      * handle game reset states - maybe a new game menu or a game over screen
      * those sorts of things. It's only called once by the init() method.
      */
-    function reset(state) {
-        switch(state) {
+    function reset() {
+        /*switch(state) {
 			case "init":
-				initLoad();
+				selector = new Selector;
+				loadRender();
+				selector.render();
 				break;
-		};
+			}*/
 	}
+	
+	
     
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -181,6 +200,7 @@ var Engine = (function(global) {
         'images/enemy-bug.png',
         'images/char-boy.png',
 		'images/star.png',
+		'images/selector.png',
 		'images/char-cat-girl.png',
 		'images/char-horn-girl.png',
 		'images/char-pink-girl.png',
