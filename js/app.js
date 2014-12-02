@@ -1,12 +1,14 @@
-//Variables and Constants
 
-var ROW_Y = [65, 145, 225];
+/*Variables and Constants*/
+
+var ROW_Y = [60, 140, 220];
 var START = {
 	x: 202,
 	y: 405,
 	row: 5
-}
+};
 var WIN = false;
+var ENEMY_MAX = 4;
 
 // Enemies our player must avoid
 
@@ -23,7 +25,7 @@ var Enemy = function(x,y,speed) {
 	this.y = ROW_Y[y];
 	this.speed = speed;
 	this.x = x; 
-}
+};
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
@@ -35,17 +37,15 @@ Enemy.prototype.update = function(dt) {
 		this.x = this.x + (this.speed * dt);
 	}
 	else {
-		this.row = Math.floor(Math.random() * 3 + 1);
-		this.y = this.row * 65;
 		this.speed = 100 + Math.floor(Math.random() * 200);
 		this.x = randomize(-100, -1); 
 	}
-}
+};
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
 	ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-}
+};
 
 
 // Now write your own player class
@@ -56,7 +56,7 @@ var Player = function() {
 	this.x = START.x;
 	this.y = START.y;
 	this.row = START.row;
-}
+};
 
 Player.prototype.squishy = function() {
 	for (enemy in allEnemies) {
@@ -64,7 +64,7 @@ Player.prototype.squishy = function() {
 			gameReset();
 		}
 	}
-}
+};
 
 Player.prototype.update = function() {
 	switch(this.dir) {
@@ -88,20 +88,20 @@ Player.prototype.update = function() {
 		break;
 	}
 	this.dir = "";
-}
-
-Player.prototype.render = function() {
-	ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 	this.squishy();
 	if (this.row === 0) {
 		winning();
 		}
-}
+};
+
+Player.prototype.render = function() {
+	ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
 
 
 
 Player.prototype.handleInput = function(dir) {
-	if (win === true) {
+	if (WIN === true) {
 		gameReset();
 	}
 	else {
@@ -132,7 +132,7 @@ Player.prototype.handleInput = function(dir) {
 			break;
 		}
 	}
-}
+};
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
@@ -154,10 +154,8 @@ function gameReset() {
 }
 
 function winning() {
-	win = true;
-	//allEnemies = [];
-	for (enemy in allEnemies) {
-		allEnemies[enemy]
+	WIN = true;
+	
 	var time = new Date().getTime() * 0.002;
 	var x = Math.sin( time ) * 96 + 200;
 	var y = Math.cos( time * 0.9 ) * 96 + 200;
@@ -178,6 +176,26 @@ function winning() {
 function randomize(from, to) {
 	var num = Math.floor(Math.random() * to + from);
 	return num;
+}
+
+function initLoad() {
+	ctx.clearRect
+	for (col = 0; col <5; col++) {
+		ctx.drawImage(Resources.get("images/stone-block.png"), col * 101, 249);
+	}
+	var chars = [
+		"images/char-boy.png",
+		"images/char-cat-girl.png",
+		"images/char-horn-girl.png",
+		"images/char-pink-girl.png",
+		"images/char-princess-girl.png"
+	]
+	var i=0;
+	for (char in chars) {
+		var image = new Image();
+		image.src = Resources.get(chars[char]);
+		ctx.drawImage(Resources.get(chars[char]), i * 101, 169);
+	}
 }
 
 // This listens for key presses and sends the keys to your

@@ -64,7 +64,7 @@ var Engine = (function(global) {
      * game loop.
      */
     function init() {
-        reset();
+        reset("init");
         lastTime = Date.now();
         main();
     }
@@ -107,6 +107,7 @@ var Engine = (function(global) {
         /* This array holds the relative URL to the image used
          * for that particular row of the game level.
          */
+		 if (init === false) {
         var rowImages = [
                 'images/water-block.png',   // Top row is water
                 'images/stone-block.png',   // Row 1 of 3 of stone
@@ -138,6 +139,7 @@ var Engine = (function(global) {
 
 
         renderEntities();
+		}
     }
 
     /* This function is called by the render function and is called on each game
@@ -159,9 +161,14 @@ var Engine = (function(global) {
      * handle game reset states - maybe a new game menu or a game over screen
      * those sorts of things. It's only called once by the init() method.
      */
-    function reset() {
-        
-    }
+    function reset(state) {
+        switch(state) {
+			case "init":
+				initLoad();
+				break;
+		};
+	}
+    
 
     /* Go ahead and load all of the images we know we're going to need to
      * draw our game level. Then set init as the callback method, so that when
@@ -173,7 +180,11 @@ var Engine = (function(global) {
         'images/grass-block.png',
         'images/enemy-bug.png',
         'images/char-boy.png',
-		'images/star.png'
+		'images/star.png',
+		'images/char-cat-girl.png',
+		'images/char-horn-girl.png',
+		'images/char-pink-girl.png',
+		'images/char-princess-girl.png'
     ]);
     Resources.onReady(init);
 
