@@ -1,16 +1,28 @@
+//Variables and Constants
+
+var ROW_Y = [65, 145, 225];
+var START = {
+	x: 202,
+	y: 405,
+	row: 5
+}
+var WIN = false;
+
 // Enemies our player must avoid
 
-var Enemy = function() {
+
+
+var Enemy = function(x,y,speed) {
 	// Variables applied to each of our instances go here,
 	// we've provided one for you to get started
 
 	// The image/sprite for our enemies, this uses
 	// a helper we've provided to easily load images
 	this.sprite = 'images/enemy-bug.png';
-	this.row = randomize(3, 1);
-	this.y = this.row * 65;
-	this.speed = 100 + randomize(200);
-	this.x = randomize(-100, -1); 
+	this.row = y;
+	this.y = ROW_Y[y];
+	this.speed = speed;
+	this.x = x; 
 }
 
 // Update the enemy's position, required method for game
@@ -41,9 +53,9 @@ Enemy.prototype.render = function() {
 // a handleInput() method.
 var Player = function() {
 	this.sprite = "images/char-boy.png";
-	this.x = 202;
-	this.y = 405;
-	this.row = 5;
+	this.x = START.x;
+	this.y = START.y;
+	this.row = START.row;
 }
 
 Player.prototype.squishy = function() {
@@ -125,24 +137,27 @@ Player.prototype.handleInput = function(dir) {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-var allEnemies = [];
 var player = new Player;
 gameReset();
 
 
 function gameReset() {
 	allEnemies = [];
-	allEnemies.push(new Enemy);
-	allEnemies.push(new Enemy);
-	allEnemies.push(new Enemy);
-	allEnemies.push(new Enemy);
+	for (i=0; i < ENEMY_MAX; i++) {
+		var x = 0;
+		var y = randomize(0,3);
+		var speed = 100 + randomize(0, 200);
+		allEnemies.push(new Enemy(x, y, speed));
+	}
 	player = new Player;
-	win = false;
+	WIN = false;
 }
 
 function winning() {
 	win = true;
-	allEnemies = [];
+	//allEnemies = [];
+	for (enemy in allEnemies) {
+		allEnemies[enemy]
 	var time = new Date().getTime() * 0.002;
 	var x = Math.sin( time ) * 96 + 200;
 	var y = Math.cos( time * 0.9 ) * 96 + 200;
