@@ -1,16 +1,16 @@
 
 /*Variables and Constants*/
 
-var ROW_Y = [60, 140, 220];
-var START = {
+var ROW_Y = [60, 140, 220]; //Row positions for enemy bugs
+var START = { //Starting position for player
 	x: 202,
-	y: 405,
+	y: 380,
 	row: 5
 };
-var WIN = false;
+var WIN = false; //Triggers game won animation
 var ENEMY_MAX = 4;
-var play = false;
-var selectedChar;
+var PLAY = false; //Flag used to load character selector or start game
+var selectedChar; //Used as pointer for the selected sprite URL in array
 var chars = [
 	"images/char-boy.png",
 	"images/char-cat-girl.png",
@@ -43,6 +43,8 @@ Enemy.prototype.update = function(dt) {
 	// You should multiply any movement by the dt parameter
 	// which will ensure the game runs at the same speed for
 	// all computers.
+	
+	//When bugs leave the screen on the right, they are redrawn off screen left
 	if (this.x < 505) {
 		this.x = this.x + (this.speed * dt);
 	}
@@ -61,13 +63,16 @@ Enemy.prototype.render = function() {
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
+
+//The row properties for player and enemy are used to abstract collisions
 var Player = function() {
 	this.sprite = chars[selectedChar];
-	this.x = 202;
-	this.y = 405;
+	this.x = START.x;
+	this.y = START.y;
 	this.row = START.row;
 };
 
+//Collision detection method on player
 Player.prototype.squishy = function() {
 	for (enemy in allEnemies) {
 		if (allEnemies[enemy].x + 100 > this.x + 50 && allEnemies[enemy].x < this.x + 100 && this.row === allEnemies[enemy].row) {
@@ -133,7 +138,7 @@ Player.prototype.handleInput = function(dir) {
 				}
 				break;
 			case "down":
-				if (this.y < 400) {
+				if (this.y < 300) {
 					this.dir = dir;
 				}
 				break;
@@ -148,7 +153,7 @@ Player.prototype.handleInput = function(dir) {
 var Selector = function() {
 	this.x = 0;
 	this.realx = this.x * 101;
-	this.y = 100;
+	this.y = 208;
 	this.sprite = "images/selector.png";
 }
 
@@ -168,7 +173,7 @@ Selector.prototype.handleInput = function(key) {
 			break;
 		case "enter":
 			selectedChar = selector.x;
-			play=true;
+			PLAY = true;
 			return;
 			break;
 		default:
@@ -241,7 +246,7 @@ document.addEventListener('keyup', function(e) {
 		39: 'right',
 		40: 'down'
 	};
-	if(play===false) {
+	if (PLAY === false) {
 		selector.handleInput(allowedKeys[e.keyCode]);
 	}
 	else {

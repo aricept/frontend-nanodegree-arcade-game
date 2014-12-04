@@ -108,7 +108,7 @@ var Engine = (function(global) {
         /* This array holds the relative URL to the image used
          * for that particular row of the game level.
          */
-		if (play === true) {
+		if (PLAY === true) {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
         var rowImages = [
                 'images/water-block.png',   // Top row is water
@@ -167,10 +167,10 @@ var Engine = (function(global) {
 		for (col = 0; col <5; col++) {
 				ctx.drawImage(Resources.get("images/stone-block.png"), col * 101, 249);
 			}
-		for (var i = 0; i < chars.length; i++) {
-			ctx.drawImage(Resources.get(chars[i]), i * 101, 230);
-		}
 		selector.render();
+		for (var i = 0; i < chars.length; i++) {
+			ctx.drawImage(Resources.get(chars[i]), i * 101, 215);
+		}
 	}
 
     /* This function does nothing but it could have been a good place to
