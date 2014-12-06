@@ -5,7 +5,8 @@ var ROW_Y = [60, 140, 220]; //Row positions for enemy bugs
 var START = { //Starting position for player
     x: 202,
     y: 380,
-    row: 5
+    row: 5,
+    col: 2;
 };
 var WIN = false; //Triggers game won animation
 var ENEMY_MAX = 4;
@@ -70,6 +71,7 @@ var Player = function() {
     this.x = START.x;
     this.y = START.y;
     this.row = START.row;
+    this.col = START.col;
 };
 
 //Collision detection method on player
@@ -81,7 +83,31 @@ Player.prototype.collide = function() {
     }
     if (npc) {
         for (char in npc) {
-            //if (npc[char])
+            var cols = this.col - npc[char].col;
+            var rows = this.row - npc[char].col;
+            var coords = cols + "," + rows;
+            switch(coords) {
+                case "1,0":
+                    this.approach = "left";
+                    npc[char].interact = true;
+                    break;
+                case "0,1":
+                    this.approach = "down";
+                    npc[char].interact = true;
+                    break;
+                case "-1,0":
+                    this.approach = "right";
+                    npc[char].interact = true;
+                    break;
+                case "0,-1":
+                    this.approach = "up";
+                    break;
+                case "0,0":
+                    break;
+                default:
+                    this.approach = "";
+                    npc[char].interact = false;
+            }
         }
     }
 };
@@ -91,11 +117,13 @@ Player.prototype.update = function() {
         case "left":
             if (this.x > 100) {
                 this.x = this.x - 101;
+                this.col--;
             }
             break;
         case "right":
             if (this.x < 400) {
                 this.x = this.x + 101;
+                this.col++;
             }
             break;
         case "up":
@@ -143,6 +171,7 @@ var Nonplayer = function(x, y, sprite) {
     this.y = y;
     this.sprite = chars[sprite];
     this.rescued = false;
+    this.interact = true;
 };
 
 Nonplayer.prototype.update = function() {
