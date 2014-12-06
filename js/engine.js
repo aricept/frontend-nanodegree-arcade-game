@@ -128,6 +128,9 @@ var Engine = (function(global) {
          * portion of the "grid"
          */
         for (row = 0; row < numRows; row++) {
+            if (row === 1) {
+                    npc[0].render();
+                 }
             for (col = 0; col < numCols; col++) {
                 /* The drawImage function of the canvas' context element
                  * requires 3 parameters: the image to draw, the x coordinate
@@ -136,9 +139,7 @@ var Engine = (function(global) {
                  * so that we get the benefits of caching these images, since
                  * we're using them over and over.
                  */
-                 if (col === 2) {
-                    ctx.drawImage(Resources.get(npc[0].sprite), npc[0].x, npc[0].y);
-                 }
+                 
                 ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
             }
         }

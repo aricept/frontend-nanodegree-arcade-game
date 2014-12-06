@@ -73,10 +73,15 @@ var Player = function() {
 };
 
 //Collision detection method on player
-Player.prototype.squishy = function() {
+Player.prototype.collide = function() {
     for (enemy in allEnemies) {
         if (allEnemies[enemy].x + 100 > this.x + 50 && allEnemies[enemy].x < this.x + 100 && this.row === allEnemies[enemy].row) {
             gameReset();
+        }
+    }
+    if (npc) {
+        for (char in npc) {
+            //if (npc[char])
         }
     }
 };
@@ -84,18 +89,26 @@ Player.prototype.squishy = function() {
 Player.prototype.update = function() {
     switch(this.dir) {
         case "left":
-            this.x = this.x - 101;
+            if (this.x > 100) {
+                this.x = this.x - 101;
+            }
             break;
         case "right":
-            this.x = this.x + 101;
+            if (this.x < 400) {
+                this.x = this.x + 101;
+            }
             break;
         case "up":
-            this.y = this.y - 83;
-            this.row--;
+            if (this.y > 100) {
+                this.y = this.y - 83;
+                this.row--;
+            }
             break;
         case "down":
-            this.y = this.y + 83;
-            this.row++;
+            if (this.y < 300) {
+                this.y = this.y + 83;
+                this.row++;
+            }
             break;
         default:
             this.x = this.x;
@@ -103,7 +116,7 @@ Player.prototype.update = function() {
         break;
     }
     this.dir = "";
-    this.squishy();
+    this.collide();
 };
 
 Player.prototype.render = function() {
@@ -121,32 +134,7 @@ Player.prototype.handleInput = function(dir) {
         gameReset();
     }
     else {
-        switch(dir) {
-            case "left":
-                if (this.x > 0) {
-                    this.dir = dir;
-                }
-                break;
-            case "right":
-                if (this.x < 400) {
-                    this.dir = dir;
-                }
-                break;
-            case "up":
-                if (this.y > 0) {
-                    this.dir = dir;
-                }
-                break;
-            case "down":
-                if (this.y < 300) {
-                    this.dir = dir;
-                }
-                break;
-            default:
-                this.x = this.x;
-                this.y = this.y;
-            break;
-        }
+        this.dir = dir;
     }
 };
 
@@ -154,7 +142,14 @@ var Nonplayer = function(x, y, sprite) {
     this.x = x;
     this.y = y;
     this.sprite = chars[sprite];
+    this.rescued = false;
 };
+
+Nonplayer.prototype.update = function() {
+    if (this.rescued) {
+        //this.x = 
+    }
+}
 
 Nonplayer.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -200,7 +195,7 @@ Selector.prototype.render = function() {
 // Place the player object in a variable called player
 var player;
 var selector;
-var npc = [new Nonplayer(202, 50, 3)];
+var npc = [new Nonplayer(202, 15, 1)];
 gameReset();
 
 
