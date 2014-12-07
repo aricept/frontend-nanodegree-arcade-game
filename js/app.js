@@ -1,12 +1,12 @@
 
 /*Variables and Constants*/
 
-var ROW_Y = [60, 140, 220]; //Row positions for enemy bugs
+var ROW_Y = [60, 140, 220, 300, 380]; //Row positions for enemy bugs
 var START = { //Starting position for player
     x: 202,
     y: 380,
     row: 5,
-    col: 2;
+    col: 2
 };
 var WIN = false; //Triggers game won animation
 var ENEMY_MAX = 4;
@@ -86,65 +86,75 @@ Player.prototype.collide = function() {
             var cols = this.col - npc[char].col;
             var rows = this.row - npc[char].col;
             var coords = cols + "," + rows;
-            switch(coords) {
-                case "1,0":
-                    this.approach = "left";
-                    npc[char].interact = true;
-                    break;
-                case "0,1":
-                    this.approach = "down";
-                    npc[char].interact = true;
-                    break;
-                case "-1,0":
-                    this.approach = "right";
-                    npc[char].interact = true;
-                    break;
-                case "0,-1":
-                    this.approach = "up";
-                    break;
-                case "0,0":
-                    break;
-                default:
-                    this.approach = "";
-                    npc[char].interact = false;
+            if (this.approach !== this.dir) {
+                switch(coords) {
+                    case "1,0":
+                        this.approach = "left";
+                        npc[char].interact = true;
+                        break;
+                    case "0,1":
+                        this.approach = "up";
+                        npc[char].interact = true;
+                        break;
+                    case "-1,0":
+                        this.approach = "right";
+                        npc[char].interact = true;
+                        break;
+                    case "0,-1":
+                        this.approach = "down";
+                        npc[char].interact = true;
+                        break;
+                    default:
+                        this.approach = "";
+                        npc[char].interact = false;
+                }
             }
+            if (this.approach)
+                if (this.approach === this.dir) {
+                    npc[char].collide();
+                }
         }
     }
 };
 
 Player.prototype.update = function() {
-    switch(this.dir) {
-        case "left":
-            if (this.x > 100) {
-                this.x = this.x - 101;
-                this.col--;
+    if (this.approach !== this.dir) {
+        switch(this.dir) {
+            case "left":
+                if (this.x > 100) {
+                    this.x = this.x - 101;
+                    this.col--;
+                }
+                break;
+            case "right":
+                if (this.x < 400) {
+                    this.x = this.x + 101;
+                    this.col++;
+                }
+                break;
+            case "up":
+                if (this.y > 100) {
+                    this.y = this.y - 83;
+                    this.row--;
+                }
+                break;
+            case "down":
+                if (this.y < 300) {
+                    this.y = this.y + 83;
+                    this.row++;
             }
+                break;
+            default:
+                this.x = this.x;
+                this.y = this.y;
             break;
-        case "right":
-            if (this.x < 400) {
-                this.x = this.x + 101;
-                this.col++;
-            }
-            break;
-        case "up":
-            if (this.y > 100) {
-                this.y = this.y - 83;
-                this.row--;
-            }
-            break;
-        case "down":
-            if (this.y < 300) {
-                this.y = this.y + 83;
-                this.row++;
-            }
-            break;
-        default:
-            this.x = this.x;
-            this.y = this.y;
-        break;
+        }
     }
-    this.dir = "";
+    else {
+
+    }
     this.collide();
+    this.dir = "";
 };
 
 Player.prototype.render = function() {
@@ -166,22 +176,40 @@ Player.prototype.handleInput = function(dir) {
     }
 };
 
-var Nonplayer = function(x, y, sprite) {
-    this.x = x;
-    this.y = y;
+var Nonplayer = function(col, row, sprite, type) {
+    this.row = row;
+    this.col = col;
+    this.x = this.col * 101;
+    this.y = ROW_Y[this.row];
     this.sprite = chars[sprite];
     this.rescued = false;
-    this.interact = true;
+    this.interact = false;
+    this.type = type;
+    this.speech = [""]
+
 };
 
 Nonplayer.prototype.update = function() {
     if (this.rescued) {
-        //this.x = 
+        this.x = player.x + 200;
+        this.y = player.y - 100;
     }
 }
 
 Nonplayer.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    if (!this.rescued) {
+        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    }
+    else {
+        ctx.save();
+        ctx.scale(.5, .5);
+        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+        ctx.restore();
+    }
+}
+
+Nonplayer.prototype.collide = function() {
+    this.rescued = true;
 }
 
 var Selector = function() {
@@ -224,7 +252,7 @@ Selector.prototype.render = function() {
 // Place the player object in a variable called player
 var player;
 var selector;
-var npc = [new Nonplayer(202, 15, 1)];
+var npc = [new Nonplayer(2, 1, 1)];
 gameReset();
 
 
