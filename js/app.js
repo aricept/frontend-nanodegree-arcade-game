@@ -119,6 +119,7 @@ Player.prototype.collide = function() {
     }
 };
 
+// TODO: add secondary collision detection if player moves into NPC space to trigger Nonplayer.collide()
 Player.prototype.update = function() {
     if (this.approach !== this.dir) {
         switch(this.dir) {
