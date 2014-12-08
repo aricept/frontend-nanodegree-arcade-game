@@ -111,16 +111,18 @@ Player.prototype.collide = function() {
                         npc[char].interact = false;
                 }
             }
-            if (this.approach)
+/*            if (this.approach) {
                 if (this.approach === this.dir) {
                     npc[char].collide();
                 }
+        }*/
         }
     }
 };
 
 // TODO: add secondary collision detection if player moves into NPC space to trigger Nonplayer.collide()
 Player.prototype.update = function() {
+    var curr = {"x": this.x, "y": this.y};
     if (this.approach !== this.dir) {
         switch(this.dir) {
             case "left":
@@ -153,9 +155,10 @@ Player.prototype.update = function() {
                 break;
         }
     }
-    else {
-        this.x = this.x;
-        this.y = this.y;
+    if (this.x === npc[0].x && this.y === npc[0].y) {
+    	this.x = curr.x;
+    	this.y = curr.y;
+    	npc[0].collide();
     }
     this.collide();
     this.dir = "";
