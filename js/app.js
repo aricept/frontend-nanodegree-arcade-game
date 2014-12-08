@@ -19,6 +19,7 @@ var chars = [
     "images/char-pink-girl.png",
     "images/char-princess-girl.png"
 ];
+var level = 1;
 
 // Enemies our player must avoid
 
@@ -81,11 +82,12 @@ Player.prototype.collide = function() {
             gameReset();
         }
     }
-    if (npc) {
+    if (npc.length > 0) {
         for (char in npc) {
             var cols = this.col - npc[char].col;
-            var rows = this.row - npc[char].col;
+            var rows = this.row - npc[char].row;
             var coords = cols + "," + rows;
+            console.log(coords);
             if (this.approach !== this.dir) {
                 switch(coords) {
                     case "1,0":
@@ -147,11 +149,12 @@ Player.prototype.update = function() {
             default:
                 this.x = this.x;
                 this.y = this.y;
-            break;
+                break;
         }
     }
     else {
-
+        this.x = this.x;
+        this.y = this.y;
     }
     this.collide();
     this.dir = "";
@@ -180,35 +183,42 @@ var Nonplayer = function(col, row, sprite, type) {
     this.row = row;
     this.col = col;
     this.x = this.col * 101;
-    this.y = ROW_Y[this.row];
+    this.y = ROW_Y[row];
     this.sprite = chars[sprite];
     this.rescued = false;
     this.interact = false;
     this.type = type;
-    this.speech = [""]
+    this.speech = [""];
+    this.distress = false;
 
 };
 
 Nonplayer.prototype.update = function() {
     if (this.rescued) {
-        this.x = player.x + 200;
-        this.y = player.y - 100;
+        this.row = player.row;
+        this.col = player.col;
+        if (player.row === 4) {
+            this.x = player.x;
+            this.y = 380;
+            this.rescued = false;
+        }
     }
 }
 
 Nonplayer.prototype.render = function() {
-    if (!this.rescued) {
-        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    if (this.distress) {
+        ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 60, this.x, this.y, 101, 60);
+    }
+    else if (this.rescued) {
+        ctx.drawImage(Resources.get(this.sprite), 0, 0, 101, 171, player.x, player.y + 20, 50, 85);
     }
     else {
-        ctx.save();
-        ctx.scale(.5, .5);
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-        ctx.restore();
     }
 }
 
 Nonplayer.prototype.collide = function() {
+    this.distress = false;
     this.rescued = true;
 }
 
@@ -252,17 +262,21 @@ Selector.prototype.render = function() {
 // Place the player object in a variable called player
 var player;
 var selector;
-var npc = [new Nonplayer(2, 1, 1)];
 gameReset();
 
 
 function gameReset() {
     allEnemies = [];
+    npc = [];
     for (i=0; i < ENEMY_MAX; i++) {
         var x = 0;
         var y = randomize(0,3);
         var speed = 100 + randomize(0, 200);
         allEnemies.push(new Enemy(x, y, speed));
+    }
+    npc = [new Nonplayer(1,0,1,"swimming")]
+    if (level = 1) {
+        npc[0].distress = true;
     }
     player = new Player;
     player.sprite = chars[selectedChar];

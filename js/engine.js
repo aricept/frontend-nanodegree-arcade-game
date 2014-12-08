@@ -95,6 +95,7 @@ var Engine = (function(global) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
+
         npc.forEach(function(npc) {
             npc.update(dt);
         });
@@ -139,10 +140,9 @@ var Engine = (function(global) {
                  * so that we get the benefits of caching these images, since
                  * we're using them over and over.
                  */
-                 
                 ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
+                }
             }
-        }
 
 
         renderEntities();
