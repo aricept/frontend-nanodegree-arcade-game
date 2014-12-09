@@ -76,100 +76,114 @@ var Player = function() {
 };
 
 //Collision detection method on player
-Player.prototype.collide = function() {
+Player.prototype.collide = function(prev) {
     for (enemy in allEnemies) {
-        if (allEnemies[enemy].x + 100 > this.x + 50 && allEnemies[enemy].x < this.x + 100 && this.row === allEnemies[enemy].row) {
+        if (allEnemies[enemy].x + 100 > this.x + 50 && allEnemies[enemy].x < this.x + 50 && this.row === allEnemies[enemy].row) {
             gameReset();
         }
     }
     if (npc.length > 0) {
-        for (char in npc) {
-            var cols = this.col - npc[char].col;
-            var rows = this.row - npc[char].row;
+        for (i = 0; i < npc.length; i++) {
+            var cols = this.col - npc[i].col;
+            var rows = this.row - npc[i].row;
             var coords = cols + "," + rows;
-            console.log(coords);
-            if (this.approach !== this.dir) {
+            if (npc[i].approach !== this.dir) {
                 switch(coords) {
                     case "1,0":
-                        this.approach = "left";
-                        npc[char].interact = true;
+                        npc[i].approach = "left";
+                        npc[i].interact = true;
+						player.dir="";
                         break;
                     case "0,1":
-                        this.approach = "up";
-                        npc[char].interact = true;
+                        npc[i].approach = "up";
+                        npc[i].interact = true;
+						player.dir="";
                         break;
                     case "-1,0":
-                        this.approach = "right";
-                        npc[char].interact = true;
+                        npc[i].approach = "right";
+                        npc[i].interact = true;
+						player.dir="";
                         break;
                     case "0,-1":
-                        this.approach = "down";
-                        npc[char].interact = true;
+                        npc[i].approach = "down";
+                        npc[i].interact = true;
+						player.dir="";
                         break;
+					case "0,0":
+						this.x = prev.x;
+						this.y = prev.y;
+						this.row = prev.row;
+						this.col = prev.col;
+						this.dir="";
+						break;
                     default:
-                        this.approach = "";
-                        npc[char].interact = false;
+                        npc[i].approach = "";
+                        npc[i].interact = false;
                 }
             }
-/*            if (this.approach) {
-                if (this.approach === this.dir) {
-                    npc[char].collide();
-                }
-        }*/
+			if (npc[i].approach && (npc[i].approach === this.dir)) {
+				/* this.x = prev.x;
+				this.y = prev.y;
+				this.row = prev.row;
+				this.col = prev.col;
+				this.dir=""; */
+				npc[i].collide(prev);
+			}
         }
     }
 };
 
-// TODO: add secondary collision detection if player moves into NPC space to trigger Nonplayer.collide()
 Player.prototype.update = function() {
-    var curr = {"x": this.x, "y": this.y};
-    if (this.approach !== this.dir) {
-        switch(this.dir) {
-            case "left":
-                if (this.x > 100) {
-                    this.x = this.x - 101;
-                    this.col--;
-                }
-                break;
-            case "right":
-                if (this.x < 400) {
-                    this.x = this.x + 101;
-                    this.col++;
-                }
-                break;
-            case "up":
-                if (this.y > 100) {
-                    this.y = this.y - 83;
-                    this.row--;
-                }
-                break;
-            case "down":
-                if (this.y < 300) {
-                    this.y = this.y + 83;
-                    this.row++;
-            }
-                break;
-            default:
-                this.x = this.x;
-                this.y = this.y;
-                break;
-        }
-    }
-    if (this.x === npc[0].x && this.y === npc[0].y) {
-    	this.x = curr.x;
-    	this.y = curr.y;
-    	npc[0].collide();
-    }
-    this.collide();
+	var prev = {"x": this.x, "y": this.y, "row": this.row, "col": this.col};
+	switch(this.dir) {
+		case "left":
+			if (this.x > 100) {
+				this.x = this.x - 101;
+				this.col--;
+			}
+			break;
+		case "right":
+			if (this.x < 400) {
+				this.x = this.x + 101;
+				this.col++;
+			}
+			break;
+		case "up":
+			if (this.y > 10) {
+				this.y = this.y - 83;
+				this.row--;
+			}
+			break;
+		case "down":
+			if (this.y < 300) {
+				this.y = this.y + 83;
+				this.row++;
+		}
+			break;
+		default:
+			this.x = this.x;
+			this.y = this.y;
+			break;
+	}
+
+	
+		
+/* Moved to Nonplayer.update
+		if (this.approach && npc[0].distress) {
+			npc[0].collide();
+		} */
+	
+	
+    this.collide(prev);
     this.dir = "";
 };
 
 Player.prototype.render = function() {
     this.sprite = chars[selectedChar];
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    if (this.row === 0) {
+    /*if (this.row === 0) {
         winning();
-    }
+    }*/
 };
 
 
@@ -183,7 +197,7 @@ Player.prototype.handleInput = function(dir) {
     }
 };
 
-var Nonplayer = function(col, row, sprite, type) {
+var Nonplayer = function(col, row, sprite) {
     this.row = row;
     this.col = col;
     this.x = this.col * 101;
@@ -191,9 +205,9 @@ var Nonplayer = function(col, row, sprite, type) {
     this.sprite = chars[sprite];
     this.rescued = false;
     this.interact = false;
-    this.type = type;
     this.speech = [""];
     this.distress = false;
+	this.approach = false;
 
 };
 
@@ -201,12 +215,26 @@ Nonplayer.prototype.update = function() {
     if (this.rescued) {
         this.row = player.row;
         this.col = player.col;
-        if (player.row === 4) {
-            this.x = player.x;
-            this.y = 380;
-            this.rescued = false;
+        if (player.row === 4 && player.dir === "down") {
+			this.x = player.x;
+			this.y = 380;
+			this.row = 5;
+			this.col = player.col;
+			this.rescued = false;
+			npcGenerate(1);
+			player.dir = "";
+			}
         }
-    }
+	if (this.approach === player.dir) {
+		
+	}
+	/*if (this.approach && (this.approach === player.dir) && this.distress) {
+		player.x = curr.x;
+		player.y = curr.y;
+		player.row = curr.row;
+		player.col = curr.col;	
+		this.collide();
+		}*/
 }
 
 Nonplayer.prototype.render = function() {
@@ -221,9 +249,16 @@ Nonplayer.prototype.render = function() {
     }
 }
 
-Nonplayer.prototype.collide = function() {
-    this.distress = false;
-    this.rescued = true;
+Nonplayer.prototype.collide = function(prev) {
+	if (this.distress === true) {
+		this.rescued = true;
+	}
+	this.distress = false;
+	player.x = prev.x;
+	player.y = prev.y;
+	player.row = prev.row;
+	player.col = prev.col;
+	player.dir="";
 }
 
 var Selector = function() {
@@ -250,6 +285,7 @@ Selector.prototype.handleInput = function(key) {
         case "enter":
             selectedChar = selector.x;
             PLAY = true;
+			gameReset();
             return;
             break;
         default:
@@ -264,9 +300,11 @@ Selector.prototype.render = function() {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-var player;
+var player = new Player();
 var selector;
-gameReset();
+var allEnemies = [];
+var npc = [];
+
 
 
 function gameReset() {
@@ -278,13 +316,28 @@ function gameReset() {
         var speed = 100 + randomize(0, 200);
         allEnemies.push(new Enemy(x, y, speed));
     }
-    npc = [new Nonplayer(1,0,1,"swimming")]
+    /*npc.push(new Nonplayer(1,0,1,"swimming");
     if (level = 1) {
         npc[0].distress = true;
-    }
+    }*/
     player = new Player;
     player.sprite = chars[selectedChar];
+	friends = chars.slice(0);
+	friends.splice(friends.indexOf(player.sprite),1);
+	npcGenerate(1,friends);
     WIN = false;
+}
+
+function npcGenerate(lvl) {
+	switch(lvl) {
+		case 1:
+			if (npc.length - 1 < chars.length-2) {
+				newFriend = friends.pop();
+				npc.push(new Nonplayer(randomize(0,5),0,chars.indexOf(newFriend)));
+				npc[npc.length-1].distress = true;
+			}
+			break;
+	}
 }
 
 function winning() {
