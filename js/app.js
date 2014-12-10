@@ -52,7 +52,11 @@ Enemy.prototype.update = function(dt) {
     }
     else {
         this.speed = 100 + Math.floor(Math.random() * 200);
-        this.x = randomize(-100, -1); 
+        this.x = randomize(-100, -1);
+        this.row = randomize(0,3);
+        console.log(this.row);
+        this.y = ROW_Y[this.row];
+        this.row++;
     }
 };
 
