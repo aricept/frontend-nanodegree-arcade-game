@@ -95,11 +95,10 @@ var Engine = (function(global) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-
         npc.forEach(function(npc) {
             npc.update(dt);
         });
-        player.update();
+		player.update();
     }
 
     /* This function initially draws the "game level", it will then call
@@ -166,8 +165,9 @@ var Engine = (function(global) {
         npc.forEach(function(npc) {
             npc.render();
         });
+		player.render();
 
-        player.render();
+        
     }
 	
 	function loadRender() {
@@ -186,13 +186,7 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        /*switch(state) {
-			case "init":
-				selector = new Selector;
-				loadRender();
-				selector.render();
-				break;
-			}*/
+ 
 	}
 	
 	
