@@ -19,7 +19,9 @@ var chars = [
     "images/char-pink-girl.png",
     "images/char-princess-girl.png"
 ];
+
 var level = 1;
+var selector;
 
 // Enemies our player must avoid
 
