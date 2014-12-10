@@ -84,49 +84,12 @@ Player.prototype.collide = function(prev) {
     }
     if (npc.length > 0) {
         for (i = 0; i < npc.length; i++) {
-            var cols = this.col - npc[i].col;
-            var rows = this.row - npc[i].row;
-            var coords = cols + "," + rows;
-            if (npc[i].approach !== this.dir) {
-                switch(coords) {
-                    case "1,0":
-                        npc[i].approach = "left";
-                        npc[i].interact = true;
-						player.dir="";
-                        break;
-                    case "0,1":
-                        npc[i].approach = "up";
-                        npc[i].interact = true;
-						player.dir="";
-                        break;
-                    case "-1,0":
-                        npc[i].approach = "right";
-                        npc[i].interact = true;
-						player.dir="";
-                        break;
-                    case "0,-1":
-                        npc[i].approach = "down";
-                        npc[i].interact = true;
-						player.dir="";
-                        break;
-					case "0,0":
-						this.x = prev.x;
-						this.y = prev.y;
-						this.row = prev.row;
-						this.col = prev.col;
-						this.dir="";
-						break;
-                    default:
-                        npc[i].approach = "";
-                        npc[i].interact = false;
-                }
-            }
-			if (npc[i].approach && (npc[i].approach === this.dir)) {
-				/* this.x = prev.x;
+            if (this.col === npc[i].col && this.row === npc[i].row) {
+				this.x = prev.x;
 				this.y = prev.y;
 				this.row = prev.row;
 				this.col = prev.col;
-				this.dir=""; */
+				this.dir="";
 				npc[i].collide(prev);
 			}
         }
@@ -165,15 +128,6 @@ Player.prototype.update = function() {
 			this.y = this.y;
 			break;
 	}
-
-	
-		
-/* Moved to Nonplayer.update
-		if (this.approach && npc[0].distress) {
-			npc[0].collide();
-		} */
-	
-	
     this.collide(prev);
     this.dir = "";
 };
@@ -181,9 +135,12 @@ Player.prototype.update = function() {
 Player.prototype.render = function() {
     this.sprite = chars[selectedChar];
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    /*if (this.row === 0) {
-        winning();
-    }*/
+    if (this.row === 0) {
+        gameReset();
+    }
+	if (WIN) {
+		winning();
+	}
 };
 
 
@@ -215,27 +172,29 @@ Nonplayer.prototype.update = function() {
     if (this.rescued) {
         this.row = player.row;
         this.col = player.col;
+		var count = 0;
         if (player.row === 4 && player.dir === "down") {
-			this.x = player.x;
-			this.y = 380;
-			this.row = 5;
-			this.col = player.col;
-			this.rescued = false;
-			npcGenerate(1);
-			player.dir = "";
+			for (var i = 0; i < npc.length; i++) {
+				if (this.col === npc[i].col) {
+					count++;
+				}
 			}
-        }
-	if (this.approach === player.dir) {
-		
+			if (count === 1) {
+				this.x = player.x;
+				this.y = 380;
+				this.row = 5;
+				this.col = player.col;
+				this.rescued = false;
+				player.dir = "";
+				count = 0;
+				if (npc.length + 1 === chars.length) {
+					WIN = true;
+				}
+				npcGenerate(1);
+			}
+		}	
 	}
-	/*if (this.approach && (this.approach === player.dir) && this.distress) {
-		player.x = curr.x;
-		player.y = curr.y;
-		player.row = curr.row;
-		player.col = curr.col;	
-		this.collide();
-		}*/
-}
+};
 
 Nonplayer.prototype.render = function() {
     if (this.distress) {
@@ -316,10 +275,6 @@ function gameReset() {
         var speed = 100 + randomize(0, 200);
         allEnemies.push(new Enemy(x, y, speed));
     }
-    /*npc.push(new Nonplayer(1,0,1,"swimming");
-    if (level = 1) {
-        npc[0].distress = true;
-    }*/
     player = new Player;
     player.sprite = chars[selectedChar];
 	friends = chars.slice(0);
