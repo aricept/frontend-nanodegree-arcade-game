@@ -230,7 +230,7 @@ var Selector = function() {
     this.x = 0;
     this.realx = this.x * 101;
     this.y = 208;
-    this.sprite = "images/selector.png";
+    this.sprite = "images/Selector.png";
 };
 
 Selector.prototype.handleInput = function(key) {
@@ -307,7 +307,7 @@ function winning() {
     var time = new Date().getTime() * 0.002;
     var x = Math.sin( time ) * 96 + 200;
     var y = Math.cos( time * 0.9 ) * 96 + 200;
-    ctx.drawImage(Resources.get("images/star.png"), x, y);
+    ctx.drawImage(Resources.get("images/Star.png"), x, y);
     ctx.fillStyle = "gold";
     ctx.font = "bold 34pt Times New Roman";
     ctx.textAlign = "center";
