@@ -111,7 +111,7 @@ var Engine = (function(global) {
         /* This array holds the relative URL to the image used
          * for that particular row of the game level.
          */
-		if (PLAY === true) {
+		if (play === true) {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 //        if (level === 1) {
             var rowImages = [
