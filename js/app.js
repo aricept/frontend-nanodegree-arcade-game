@@ -267,9 +267,11 @@ Selector.prototype.render = function() {
                 i = 0;
             }
         var selThrob = ctx.getImageData(this.x, this.y, Resources.get(this.sprite).width, Resources.get(this.sprite).height);
+        console.log(selThrob);
         for (p = 3; p < selThrob.length; p + 4) {
             selThrob[p] = alpha[i];
         }
+        console.log(selThrob);
         ctx.putImageData(selThrob, this.x, this.y);
     }
 };
