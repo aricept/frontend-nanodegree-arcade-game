@@ -268,7 +268,7 @@ Selector.prototype.render = function() {
             selThrob[p] = 0;
         }
     }
-    console.log(selThrob);
+    console.log(selThrob.data);
     ctx.putImageData(selThrob, this.x, this.y);
 };
 
