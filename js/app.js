@@ -261,7 +261,7 @@ Selector.prototype.handleInput = function(key) {
 Selector.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.realx, this.y);
     var selThrob = ctx.getImageData(this.x, this.y, Resources.get(this.sprite).width, Resources.get(this.sprite).height);
-    console.log(selThrob);
+    console.log(selThrob.data);
     for (p = 3; p < selThrob.length; p + 4) {
         selThrob[p]++;
         if (selThrob[p] > 255) {
