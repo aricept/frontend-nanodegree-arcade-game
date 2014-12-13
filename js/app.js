@@ -266,7 +266,7 @@ Selector.prototype.render = function() {
         for (p = 3; p < selThrob.length; p + 4) {
             selThrob[p] = alpha[i];
         }
-        ctx.putImageData(selThrob, this.x, this.y, Resources.get(this.sprite).width, Resources.get(this.sprite).height);
+        ctx.putImageData(selThrob, this.x, this.y);
     }
 };
 
