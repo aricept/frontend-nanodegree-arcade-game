@@ -8,9 +8,9 @@ var START = { //Starting position for player
     row: 4,
     col: 2
 };
-var WIN = false; //Triggers game won animation
 var ENEMY_MAX = 4;
-var PLAY = false; //Flag used to load character selector or start game
+var win = false; //Triggers game won animation
+var play = false; //Flag used to load character selector or start game
 var selectedChar; //Used as pointer for the selected sprite URL in array
 var chars = [
     "images/char-boy.png",
@@ -138,13 +138,13 @@ Player.prototype.update = function() {
 
 Player.prototype.render = function() {
     //this.sprite = chars[selectedChar];
-    if(!WIN) {
+    if(!win) {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
     if (this.row === 0) {
         gameReset();
     }
-	if (WIN) {
+	if (win) {
 		winning();
 	}
 };
@@ -152,7 +152,7 @@ Player.prototype.render = function() {
 
 
 Player.prototype.handleInput = function(dir) {
-    if (WIN === true) {
+    if (win === true) {
         gameReset();
     }
     else {
@@ -194,7 +194,7 @@ Nonplayer.prototype.update = function() {
 				player.dir = "";
 				count = 0;
 				if (npc.length + 1 === chars.length) {
-					WIN = true;
+					win = true;
 				}
 				npcGenerate(1);
 			}
@@ -249,7 +249,7 @@ Selector.prototype.handleInput = function(key) {
             break;
         case "enter":
             selectedChar = selector.x;
-            PLAY = true;
+            play = true;
 			gameReset();
             return;
             break;
@@ -286,7 +286,7 @@ function gameReset() {
 	friends = chars.slice(0);
 	friends.splice(friends.indexOf(player.sprite),1);
 	npcGenerate(1,friends);
-    WIN = false;
+    win = false;
 }
 
 function npcGenerate(lvl) {
@@ -302,7 +302,7 @@ function npcGenerate(lvl) {
 }
 
 function winning() {
-    WIN = true;
+    win = true;
     allEnemies=[];
     var time = new Date().getTime() * 0.002;
     var x = Math.sin( time ) * 96 + 200;
@@ -342,7 +342,7 @@ document.addEventListener('keyup', function(e) {
         39: 'right',
         40: 'down'
     };
-    if (PLAY === false) {
+    if (play === false) {
         selector.handleInput(allowedKeys[e.keyCode]);
     }
     else {
