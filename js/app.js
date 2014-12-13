@@ -264,7 +264,7 @@ Selector.prototype.render = function() {
     console.log(selThrob);
     for (p = 3; p < selThrob.length; p + 4) {
         selThrob[p]++;
-        if selThrob[p] > 255 {
+        if (selThrob[p] > 255) {
             selThrob[p] = 0;
         }
     }
