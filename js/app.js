@@ -4,8 +4,8 @@
 var ROW_Y = [60, 140, 220, 300, 380]; //Row positions for enemy bugs
 var START = { //Starting position for player
     x: 202,
-    y: 380,
-    row: 5,
+    y: 297,
+    row: 4,
     col: 2
 };
 var WIN = false; //Triggers game won animation
@@ -19,7 +19,6 @@ var chars = [
     "images/char-pink-girl.png",
     "images/char-princess-girl.png"
 ];
-
 var level = 1;
 var selector;
 
@@ -38,7 +37,7 @@ var Enemy = function(x,y,speed) {
     this.row = y;
     this.row = this.row + 1;
     this.speed = speed;
-    this.x = x; 
+    this.x = x;
 };
 
 // Update the enemy's position, required method for game
@@ -56,7 +55,6 @@ Enemy.prototype.update = function(dt) {
         this.speed = 100 + Math.floor(Math.random() * 200);
         this.x = randomize(-100, -1);
         this.row = randomize(0,3);
-        console.log(this.row);
         this.y = ROW_Y[this.row];
         this.row++;
     }
@@ -139,8 +137,10 @@ Player.prototype.update = function() {
 };
 
 Player.prototype.render = function() {
-    this.sprite = chars[selectedChar];
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    //this.sprite = chars[selectedChar];
+    if(!WIN) {
+        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    }
     if (this.row === 0) {
         gameReset();
     }
@@ -259,7 +259,14 @@ Selector.prototype.handleInput = function(key) {
 };
 
 Selector.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.realx, this.y);
+    var alpha = [0, 50, 100, 150, 255];
+    for (i = 0; i < alpha.length; i++) {
+        var selThrob = ctx.getImageData(this.x, this.y, Resources.get(this.sprite).width, Resources.get(this.sprite).height);
+        for (p = 3; p < selThrob.length; p + 4) {
+            selThrob[p] = alpha[i];
+        }
+    }
+    //ctx.drawImage(Resources.get(this.sprite), this.realx, this.y);
 };
 
 // Now instantiate your objects.
@@ -307,7 +314,8 @@ function winning() {
     var time = new Date().getTime() * 0.002;
     var x = Math.sin( time ) * 96 + 200;
     var y = Math.cos( time * 0.9 ) * 96 + 200;
-    ctx.drawImage(Resources.get("images/Star.png"), x, y);
+    //ctx.drawImage(Resources.get("images/Star.png"), x, y);
+    ctx.drawImage(Resources.get(player.sprite), x, y);
     ctx.fillStyle = "gold";
     ctx.font = "bold 34pt Times New Roman";
     ctx.textAlign = "center";
