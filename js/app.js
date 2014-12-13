@@ -3,10 +3,18 @@
 
 var ROW_Y = [60, 140, 220, 300, 380]; //Row positions for enemy bugs
 var START = { //Starting position for player
-    x: 202,
-    y: 297,
-    row: 4,
-    col: 2
+    lvl1 = {
+        x: 202,
+        y: 297,
+        row: 4,
+        col: 2
+    },
+    lvl2 = {
+        x: 202,
+        y: 380,
+        row: 5,
+        col: 2
+    }
 };
 var ENEMY_MAX = 4;
 var win = false; //Triggers game won animation
@@ -73,17 +81,40 @@ Enemy.prototype.render = function() {
 //The row properties for player and enemy are used to abstract collisions
 var Player = function() {
     this.sprite = chars[selectedChar];
-    this.x = START.x;
-    this.y = START.y;
-    this.row = START.row;
-    this.col = START.col;
+    switch (level) {
+        case 1:
+            this.x = START.lvl1.x;
+            this.y = START.lvl1.y;
+            this.row = START.lvl1.row;
+            this.col = START.lvl1.col;
+            break;
+        case 2:
+            this.x = START.lvl2.x;
+            this.y = START.lvl2.y;
+            this.row = START.lvl2.row;
+            this.col = START.lvl2.col;
+    }
+    
 };
 
 //Collision detection method on player
 Player.prototype.collide = function(prev) {
     for (enemy in allEnemies) {
         if (allEnemies[enemy].x + 100 > this.x + 50 && allEnemies[enemy].x < this.x + 50 && this.row === allEnemies[enemy].row) {
-            gameReset();
+            player.x = START.x;
+            player.y = START.y;
+            player.row = START.row;
+            player.col = START.col;
+            for (var i = 0; i < npc.length; i++) {
+                if (npc[i].rescued) {
+                    npc[i].row = 0;
+                    npc[i].col = randomize(0,3);
+                    npc[i].x = npc[i].col * 101;
+                    npc[i].y = ROW_Y[npc[i].row];
+                    npc[i].distress = true;
+                    npc[i].rescued = false;
+                }
+            }
         }
     }
     if (npc.length > 0) {
@@ -138,11 +169,11 @@ Player.prototype.update = function() {
 
 Player.prototype.render = function() {
     //this.sprite = chars[selectedChar];
-    if(!win) {
-        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    if(!win && this.row === 0) {
+        ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 60, this.x, this.y + 95, 101, 60);
     }
-    if (this.row === 0) {
-        gameReset();
+    if (!win && this.row > 0) {
+        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
 	if (win) {
 		winning();
@@ -153,6 +184,7 @@ Player.prototype.render = function() {
 
 Player.prototype.handleInput = function(dir) {
     if (win === true) {
+        level++;
         gameReset();
     }
     else {
