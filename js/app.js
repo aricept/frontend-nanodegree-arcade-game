@@ -260,13 +260,14 @@ Selector.prototype.handleInput = function(key) {
 
 Selector.prototype.render = function() {
     var alpha = [0, 50, 100, 150, 255];
+    ctx.drawImage(Resources.get(this.sprite), this.realx, this.y);
     for (i = 0; i < alpha.length; i++) {
         var selThrob = ctx.getImageData(this.x, this.y, Resources.get(this.sprite).width, Resources.get(this.sprite).height);
         for (p = 3; p < selThrob.length; p + 4) {
             selThrob[p] = alpha[i];
         }
+        ctx.putImageData(selThrob, this.x, this.y, Resources.get(this.sprite).width, Resources.get(this.sprite).height);
     }
-    //ctx.drawImage(Resources.get(this.sprite), this.realx, this.y);
 };
 
 // Now instantiate your objects.
