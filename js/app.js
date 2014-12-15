@@ -2,20 +2,27 @@
 /*Variables and Constants*/
 
 var ROW_Y = [60, 140, 220, 300, 380]; //Row positions for enemy bugs
+var NPC_Y = {
+    lvl1: 60,
+    lvl2: -35
+
+};
 var START = { //Starting position for player
-    lvl1 = {
+    lvl1: {
         x: 202,
         y: 297,
         row: 4,
         col: 2
     },
-    lvl2 = {
-        x: 202,
+    lvl2: {
         y: 380,
         row: 5,
-        col: 2
+        col: [2, 1, 0, 3, 4],
+        colPos: 0,
+        x: 0
     }
 };
+START.lvl2.x = START.lvl2.col[START.lvl2.colPos] * 101;
 var ENEMY_MAX = 4;
 var win = false; //Triggers game won animation
 var play = false; //Flag used to load character selector or start game
@@ -43,7 +50,7 @@ var Enemy = function(x,y,speed) {
     this.sprite = 'images/enemy-bug.png';
     this.y = ROW_Y[y];
     this.row = y;
-    this.row = this.row + 1;
+    //this.row = this.row + 2;
     this.speed = speed;
     this.x = x;
 };
@@ -56,13 +63,13 @@ Enemy.prototype.update = function(dt) {
     // all computers.
     
     //When bugs leave the screen on the right, they are redrawn off screen left
-    if (this.x < 505) {
+    if (this.x < ctx.canvas.width) {
         this.x = this.x + (this.speed * dt);
     }
     else {
         this.speed = 100 + Math.floor(Math.random() * 200);
-        this.x = randomize(-100, -1);
-        this.row = randomize(0,3);
+        this.x = randomize(-100, -300);
+        this.row = (level === 2) ? randomize(0,3) : randomize(0,2);
         this.y = ROW_Y[this.row];
         this.row++;
     }
@@ -92,7 +99,8 @@ var Player = function() {
             this.x = START.lvl2.x;
             this.y = START.lvl2.y;
             this.row = START.lvl2.row;
-            this.col = START.lvl2.col;
+            this.col = START.lvl2.col[START.lvl2.colPos];
+            break;
     }
     
 };
@@ -101,16 +109,34 @@ var Player = function() {
 Player.prototype.collide = function(prev) {
     for (enemy in allEnemies) {
         if (allEnemies[enemy].x + 100 > this.x + 50 && allEnemies[enemy].x < this.x + 50 && this.row === allEnemies[enemy].row) {
-            player.x = START.x;
-            player.y = START.y;
-            player.row = START.row;
-            player.col = START.col;
+            if (level === 1) {
+                player.x = START.lvl1.x;
+                player.y = START.lvl1.y;
+                player.row = START.lvl1.row;
+                player.col = START.lvl1.col;
+                console.log("Level 1 Collision with Enemy "+enemy+" at x "+allEnemies[enemy].x+" and row "+allEnemies[enemy].row);
+            }
+            if (level === 2) {
+                prev = "";
+                player.x = START.lvl2.x;
+                player.y = START.lvl2.y;
+                player.row = START.lvl2.row;
+                player.col = START.lvl2.col[START.lvl2.colPos];
+                console.log("Level 2 Collision");
+            }
             for (var i = 0; i < npc.length; i++) {
                 if (npc[i].rescued) {
                     npc[i].row = 0;
                     npc[i].col = randomize(0,3);
                     npc[i].x = npc[i].col * 101;
-                    npc[i].y = ROW_Y[npc[i].row];
+                    if (level === 1) {
+                        npc[i].y = NPC_Y.lvl1;
+                        console.log("Level 1 NPC Rescued Collision");
+                    }
+                    if (level === 2) {
+                        npc[i].y = NPC_Y.lvl2;
+                        console.log("Level 2 NPC Rescued Collision");
+                    }
                     npc[i].distress = true;
                     npc[i].rescued = false;
                 }
@@ -118,14 +144,16 @@ Player.prototype.collide = function(prev) {
         }
     }
     if (npc.length > 0) {
-        for (i = 0; i < npc.length; i++) {
-            if (this.col === npc[i].col && this.row === npc[i].row) {
-				this.x = prev.x;
-				this.y = prev.y;
-				this.row = prev.row;
-				this.col = prev.col;
-				this.dir="";
-				npc[i].collide(prev);
+        for (np in npc) {
+            if (this.col === npc[np].col && this.row === npc[np].row) {
+				console.log("Collision with NPC "+np+" at col "+npc[np].col+" and row "+npc[np].row+" with player at col "+player.col+" and row "+player.row);
+                player.x = prev.x;
+                player.y = prev.y;
+                player.row = prev.row;
+                player.col = prev.col;
+                player.dir="";
+                npc[np].collide(prev);
+                console.log("Collision with NPC "+np+" at col "+npc[np].col+" and row "+npc[np].row+" with player at col "+player.col+" and row "+player.row);
 			}
         }
     }
@@ -169,22 +197,41 @@ Player.prototype.update = function() {
 
 Player.prototype.render = function() {
     //this.sprite = chars[selectedChar];
-    if(!win && this.row === 0) {
-        ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 60, this.x, this.y + 95, 101, 60);
+    switch (level) {
+        case 1:
+            if(!win && this.row === 0) {
+                ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 60, this.x, this.y + 95, 101, 60);
+            }
+            if (!win && this.row > 0) {
+                ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+            }
+        	if (win) {
+        		winning();
+        	}
+            break;
+        case 2:
+            if (!win && this.row > 0 && this.row < 5) {
+                ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 60, this.x, this.y + 90, 101, 60);
+            }
+            if (!win && (this.row === 5 || this.row === 0)) {
+                ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+            }
+            if (win) {
+                winning();
+            }
+            break;
     }
-    if (!win && this.row > 0) {
-        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    }
-	if (win) {
-		winning();
-	}
 };
 
 
 
 Player.prototype.handleInput = function(dir) {
-    if (win === true) {
+    if (win === true && level === 1) {
         level++;
+        gameReset();
+    }
+    if (win === true && level === 2) {
+        level--;
         gameReset();
     }
     else {
@@ -196,7 +243,12 @@ var Nonplayer = function(col, row, sprite) {
     this.row = row;
     this.col = col;
     this.x = this.col * 101;
-    this.y = ROW_Y[row];
+    if (level === 1) {
+        this.y = NPC_Y.lvl1;
+    }
+    if (level === 2) {
+        this.y = NPC_Y.lvl2;
+    }
     this.sprite = chars[sprite];
     this.rescued = false;
     this.interact = false;
@@ -219,12 +271,22 @@ Nonplayer.prototype.update = function() {
 			}
 			if (count === 1) {
 				this.x = player.x;
-				this.y = 380;
+				this.y = 390;
 				this.row = 5;
 				this.col = player.col;
 				this.rescued = false;
 				player.dir = "";
 				count = 0;
+                if (level === 2 && this.col === START.lvl2.col[START.lvl2.colPos]) {
+                    START.lvl2.colPos++;
+                    START.lvl2.x = START.lvl2.col[START.lvl2.colPos] * 101;
+                    for (var n = 0; n < npc.length; n++) {
+                        if (START.lvl2.col[START.lvl2.colPos] === npc[n].col) {
+                            START.lvl2.colPos++;
+                            START.lvl2.x = START.lvl2.col[START.lvl2.colPos] * 101;
+                        }
+                    }
+                }
 				if (npc.length + 1 === chars.length) {
 					win = true;
 				}
@@ -236,7 +298,12 @@ Nonplayer.prototype.update = function() {
 
 Nonplayer.prototype.render = function() {
     if (this.distress) {
-        ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 60, this.x, this.y, 101, 60);
+        if (level === 1) {
+            ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 60, this.x, this.y, 101, 60);
+        }
+        else {
+            ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+        }
     }
     else if (this.rescued) {
         ctx.drawImage(Resources.get(this.sprite), 0, 0, 101, 171, player.x, player.y + 20, 50, 85);
@@ -251,11 +318,6 @@ Nonplayer.prototype.collide = function(prev) {
 		this.rescued = true;
 	}
 	this.distress = false;
-	player.x = prev.x;
-	player.y = prev.y;
-	player.row = prev.row;
-	player.col = prev.col;
-	player.dir="";
 }
 
 var Selector = function() {
@@ -282,6 +344,7 @@ Selector.prototype.handleInput = function(key) {
         case "enter":
             selectedChar = selector.x;
             play = true;
+            selector = "";
 			gameReset();
             return;
             break;
@@ -307,9 +370,10 @@ var npc = [];
 function gameReset() {
     allEnemies = [];
     npc = [];
+    (level === 2) ? ENEMY_MAX = 6 : ENEMY_MAX = 4;
     for (i=0; i < ENEMY_MAX; i++) {
         var x = 0;
-        var y = randomize(0,3);
+        var y = (level === 2) ? randomize(0,3) : randomize(0,2);
         var speed = 100 + randomize(0, 200);
         allEnemies.push(new Enemy(x, y, speed));
     }
@@ -323,10 +387,10 @@ function gameReset() {
 
 function npcGenerate(lvl) {
 	switch(lvl) {
-		case 1:
+		case 1 || 2:
 			if (npc.length - 1 < chars.length-2) {
 				newFriend = friends.pop();
-				npc.push(new Nonplayer(randomize(0,5),0,chars.indexOf(newFriend)));
+				npc.push(new Nonplayer(randomize(0,4),0,chars.indexOf(newFriend)));
 				npc[npc.length-1].distress = true;
 			}
 			break;
@@ -339,24 +403,42 @@ function winning() {
     var time = new Date().getTime() * 0.002;
     var x = Math.sin( time ) * 96 + 200;
     var y = Math.cos( time * 0.9 ) * 96 + 200;
-    //ctx.drawImage(Resources.get("images/Star.png"), x, y);
-    ctx.drawImage(Resources.get(player.sprite), x, y);
-    ctx.fillStyle = "gold";
-    ctx.font = "bold 34pt Times New Roman";
-    ctx.textAlign = "center";
-    ctx.fillText("CONGRATULATIONS!", 250, 303);
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 2;
-    ctx.strokeText("CONGRATULATIONS!", 250, 303);
-    ctx.font = "bold 20pt Times New Roman";
-    ctx.fillText("Press an Arrow to Play Again", 250, 450);
-    ctx.lineWidth = 1;
-    ctx.strokeText("Press an Arrow to Play Again", 250, 450);
-    ctx.stroke();
+    if (level === 1) {
+        ctx.drawImage(Resources.get(player.sprite), x, y);
+        ctx.fillStyle = "gold";
+        ctx.font = "bold 34pt Times New Roman";
+        ctx.textAlign = "center";
+        ctx.fillText("CONGRATULATIONS!", 250, 303);
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+        ctx.strokeText("CONGRATULATIONS!", 250, 303);
+        ctx.font = "bold 20pt Times New Roman";
+        ctx.fillText("Press an Arrow to Continue", 250, 450);
+        ctx.lineWidth = 1;
+        ctx.strokeText("Press an Arrow to Continue", 250, 450);
+        ctx.stroke();
+    }
+    if (level === 2) {
+        ctx.drawImage(Resources.get(player.sprite), START.lvl2.x, START.lvl2.y);
+        ctx.drawImage(Resources.get("images/Star.png"), x, y);
+        ctx.fillStyle = "gold";
+        ctx.font = "bold 34pt Times New Roman";
+        ctx.textAlign = "center";
+        ctx.fillText("CONGRATULATIONS!", 250, 303);
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+        ctx.strokeText("CONGRATULATIONS!", 250, 303);
+        ctx.font = "bold 20pt Times New Roman";
+        ctx.fillText("Press an Arrow to Play Again", 250, 450);
+        ctx.lineWidth = 1;
+        ctx.strokeText("Press an Arrow to Play Again", 250, 450);
+        ctx.stroke();
+    }
+    
 }
 
 function randomize(from, to) {
-    var num = Math.floor(Math.random() * to + from);
+    var num = Math.floor(Math.random() * (to - from + 1) + from);
     return num;
 }
 
