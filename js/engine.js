@@ -152,10 +152,18 @@ var Engine = (function(global) {
                      * so that we get the benefits of caching these images, since
                      * we're using them over and over.
                      */
+                    if (rowImages[row] === 'images/water-block.png') {
+                        ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
+                        var water = ctx.getImageData(col * 101, row * 83, Resources.get(rowImages[row]).width, Resources.get(rowImages[row]).height);
+                        for (var w = 3; w < water.data.length; water + 4) {
+                            water.data[w] = 100;
+                        }
+                    }
+                    else {
                     ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
                     }
                 }
-
+            }
 
             renderEntities();
 		}

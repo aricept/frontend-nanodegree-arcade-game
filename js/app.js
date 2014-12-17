@@ -5,7 +5,6 @@ var ROW_Y = [60, 140, 220, 300, 380]; //Row positions for enemy bugs
 var NPC_Y = {
     lvl1: 60,
     lvl2: -35
-
 };
 var START = { //Starting position for player
     lvl1: {
@@ -23,19 +22,18 @@ var START = { //Starting position for player
     }
 };
 START.lvl2.x = START.lvl2.col[START.lvl2.colPos] * 101;
-var ENEMY_MAX = 4;
+var enemyMax = 4;
 var win = false; //Triggers game won animation
 var play = false; //Flag used to load character selector or start game
 var selectedChar; //Used as pointer for the selected sprite URL in array
 var chars = [
-    "images/char-boy.png",
-    "images/char-cat-girl.png",
-    "images/char-horn-girl.png",
-    "images/char-pink-girl.png",
-    "images/char-princess-girl.png"
+    'images/char-boy.png',
+    'images/char-cat-girl.png',
+    'images/char-horn-girl.png',
+    'images/char-pink-girl.png',
+    'images/char-princess-girl.png'
 ];
 var level = 1;
-var selector;
 
 // Enemies our player must avoid
 
@@ -50,7 +48,6 @@ var Enemy = function(x,y,speed) {
     this.sprite = 'images/enemy-bug.png';
     this.y = ROW_Y[y];
     this.row = y;
-    //this.row = this.row + 2;
     this.speed = speed;
     this.x = x;
 };
@@ -109,33 +106,33 @@ var Player = function() {
 Player.prototype.collide = function(prev) {
     for (enemy in allEnemies) {
         if (allEnemies[enemy].x + 100 > this.x + 50 && allEnemies[enemy].x < this.x + 50 && this.row === allEnemies[enemy].row) {
-            if (level === 1) {
-                player.x = START.lvl1.x;
-                player.y = START.lvl1.y;
-                player.row = START.lvl1.row;
-                player.col = START.lvl1.col;
-                console.log("Level 1 Collision with Enemy "+enemy+" at x "+allEnemies[enemy].x+" and row "+allEnemies[enemy].row);
-            }
-            if (level === 2) {
-                prev = "";
-                player.x = START.lvl2.x;
-                player.y = START.lvl2.y;
-                player.row = START.lvl2.row;
-                player.col = START.lvl2.col[START.lvl2.colPos];
-                console.log("Level 2 Collision");
+            switch (level) {
+                case 1:
+                    player.x = START.lvl1.x;
+                    player.y = START.lvl1.y;
+                    player.row = START.lvl1.row;
+                    player.col = START.lvl1.col;
+                    break;
+                case 2:
+                    prev = '';
+                    player.x = START.lvl2.x;
+                    player.y = START.lvl2.y;
+                    player.row = START.lvl2.row;
+                    player.col = START.lvl2.col[START.lvl2.colPos];
+                    break;
             }
             for (var i = 0; i < npc.length; i++) {
                 if (npc[i].rescued) {
                     npc[i].row = 0;
                     npc[i].col = randomize(0,3);
                     npc[i].x = npc[i].col * 101;
-                    if (level === 1) {
-                        npc[i].y = NPC_Y.lvl1;
-                        console.log("Level 1 NPC Rescued Collision");
-                    }
-                    if (level === 2) {
-                        npc[i].y = NPC_Y.lvl2;
-                        console.log("Level 2 NPC Rescued Collision");
+                    switch (level) {
+                        case 1:
+                            npc[i].y = NPC_Y.lvl1;
+                            break;
+                        case 2:
+                            npc[i].y = NPC_Y.lvl2;
+                            break;
                     }
                     npc[i].distress = true;
                     npc[i].rescued = false;
@@ -144,47 +141,45 @@ Player.prototype.collide = function(prev) {
         }
     }
     if (npc.length > 0) {
-        for (np in npc) {
+        for (var np = 0; np < npc.length; np++) {
             if (this.col === npc[np].col && this.row === npc[np].row) {
-				console.log("Collision with NPC "+np+" at col "+npc[np].col+" and row "+npc[np].row+" with player at col "+player.col+" and row "+player.row);
                 player.x = prev.x;
                 player.y = prev.y;
                 player.row = prev.row;
                 player.col = prev.col;
-                player.dir="";
+                player.dir='';
                 npc[np].collide(prev);
-                console.log("Collision with NPC "+np+" at col "+npc[np].col+" and row "+npc[np].row+" with player at col "+player.col+" and row "+player.row);
 			}
         }
     }
 };
 
 Player.prototype.update = function() {
-	var prev = {"x": this.x, "y": this.y, "row": this.row, "col": this.col};
+	var prev = {'x': this.x, 'y': this.y, 'row': this.row, 'col': this.col};
 	switch(this.dir) {
-		case "left":
+		case 'left':
 			if (this.x > 100) {
 				this.x = this.x - 101;
 				this.col--;
 			}
 			break;
-		case "right":
+		case 'right':
 			if (this.x < 400) {
 				this.x = this.x + 101;
 				this.col++;
 			}
 			break;
-		case "up":
+		case 'up':
 			if (this.y > 10) {
 				this.y = this.y - 83;
 				this.row--;
 			}
 			break;
-		case "down":
+		case 'down':
 			if (this.y < 300) {
 				this.y = this.y + 83;
 				this.row++;
-		}
+            }
 			break;
 		default:
 			this.x = this.x;
@@ -192,7 +187,7 @@ Player.prototype.update = function() {
 			break;
 	}
     this.collide(prev);
-    this.dir = "";
+    this.dir = '';
 };
 
 Player.prototype.render = function() {
@@ -252,7 +247,7 @@ var Nonplayer = function(col, row, sprite) {
     this.sprite = chars[sprite];
     this.rescued = false;
     this.interact = false;
-    this.speech = [""];
+    this.speech = [''];
     this.distress = false;
 	this.approach = false;
 
@@ -263,7 +258,7 @@ Nonplayer.prototype.update = function() {
         this.row = player.row;
         this.col = player.col;
 		var count = 0;
-        if (player.row === 4 && player.dir === "down") {
+        if (player.row === 4 && player.dir === 'down') {
 			for (var i = 0; i < npc.length; i++) {
 				if (this.col === npc[i].col) {
 					count++;
@@ -275,7 +270,7 @@ Nonplayer.prototype.update = function() {
 				this.row = 5;
 				this.col = player.col;
 				this.rescued = false;
-				player.dir = "";
+				player.dir = '';
 				count = 0;
                 if (level === 2 && this.col === START.lvl2.col[START.lvl2.colPos]) {
                     START.lvl2.colPos++;
@@ -324,29 +319,28 @@ var Selector = function() {
     this.x = 0;
     this.realx = this.x * 101;
     this.y = 208;
-    this.sprite = "images/Selector.png";
+    this.sprite = 'images/Selector.png';
 };
 
 Selector.prototype.handleInput = function(key) {
     switch(key) {
-        case "left":
+        case 'left':
             if (selector.x > 0) {
                 selector.x--;
                 selector.realx = this.x * 101;
             }
             break;
-        case "right":
+        case 'right':
             if (selector.x < 4) {
                 selector.x++;
                 selector.realx = this.x * 101;
             }
             break;
-        case "enter":
+        case 'enter':
             selectedChar = selector.x;
             play = true;
-            selector = "";
+            selector = '';
 			gameReset();
-            return;
             break;
         default:
             break;
@@ -360,18 +354,18 @@ Selector.prototype.render = function() {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-var player = new Player();
+
+var player = new Player;
 var selector;
 var allEnemies = [];
 var npc = [];
 
 
-
 function gameReset() {
     allEnemies = [];
     npc = [];
-    (level === 2) ? ENEMY_MAX = 6 : ENEMY_MAX = 4;
-    for (i=0; i < ENEMY_MAX; i++) {
+    (level === 2) ? enemyMax = 6 : enemyMax = 4;
+    for (i=0; i < enemyMax; i++) {
         var x = 0;
         var y = (level === 2) ? randomize(0,3) : randomize(0,2);
         var speed = 100 + randomize(0, 200);
@@ -405,33 +399,33 @@ function winning() {
     var y = Math.cos( time * 0.9 ) * 96 + 200;
     if (level === 1) {
         ctx.drawImage(Resources.get(player.sprite), x, y);
-        ctx.fillStyle = "gold";
-        ctx.font = "bold 34pt Times New Roman";
-        ctx.textAlign = "center";
-        ctx.fillText("CONGRATULATIONS!", 250, 303);
-        ctx.strokeStyle = "black";
+        ctx.fillStyle = 'gold';
+        ctx.font = 'bold 34pt Times New Roman';
+        ctx.textAlign = 'center';
+        ctx.fillText('CONGRATULATIONS!', 250, 303);
+        ctx.strokeStyle = 'black';
         ctx.lineWidth = 2;
-        ctx.strokeText("CONGRATULATIONS!", 250, 303);
-        ctx.font = "bold 20pt Times New Roman";
-        ctx.fillText("Press an Arrow to Continue", 250, 450);
+        ctx.strokeText('CONGRATULATIONS!', 250, 303);
+        ctx.font = 'bold 20pt Times New Roman';
+        ctx.fillText('Press an Arrow to Continue', 250, 450);
         ctx.lineWidth = 1;
-        ctx.strokeText("Press an Arrow to Continue", 250, 450);
+        ctx.strokeText('Press an Arrow to Continue', 250, 450);
         ctx.stroke();
     }
     if (level === 2) {
         ctx.drawImage(Resources.get(player.sprite), START.lvl2.x, START.lvl2.y);
-        ctx.drawImage(Resources.get("images/Star.png"), x, y);
-        ctx.fillStyle = "gold";
-        ctx.font = "bold 34pt Times New Roman";
-        ctx.textAlign = "center";
-        ctx.fillText("CONGRATULATIONS!", 250, 303);
-        ctx.strokeStyle = "black";
+        ctx.drawImage(Resources.get('images/Star.png'), x, y);
+        ctx.fillStyle = 'gold';
+        ctx.font = 'bold 34pt Times New Roman';
+        ctx.textAlign = 'center';
+        ctx.fillText('CONGRATULATIONS!', 250, 303);
+        ctx.strokeStyle = 'black';
         ctx.lineWidth = 2;
-        ctx.strokeText("CONGRATULATIONS!", 250, 303);
-        ctx.font = "bold 20pt Times New Roman";
-        ctx.fillText("Press an Arrow to Play Again", 250, 450);
+        ctx.strokeText('CONGRATULATIONS!', 250, 303);
+        ctx.font = 'bold 20pt Times New Roman';
+        ctx.fillText('Press an Arrow to Play Again', 250, 450);
         ctx.lineWidth = 1;
-        ctx.strokeText("Press an Arrow to Play Again", 250, 450);
+        ctx.strokeText('Press an Arrow to Play Again', 250, 450);
         ctx.stroke();
     }
     
