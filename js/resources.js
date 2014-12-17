@@ -58,6 +58,7 @@
                  */
                 if(isReady()) {
                     readyCallbacks.forEach(function(func) { func(); });
+                    readyCallbacks = [];
                 }
             };
 
@@ -97,6 +98,7 @@
      */
     function onReady(func) {
         readyCallbacks.push(func);
+        console.log(readyCallbacks);
     }
 
     /* This object defines the publicly accessible functions available to
