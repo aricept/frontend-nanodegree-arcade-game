@@ -141,6 +141,9 @@ var Engine = (function(global) {
                     allEnemies.forEach(function(enemy) {
                         enemy.render();
                     });
+                    if (player.row > 0 && player.row < 5) {
+                        player.render();
+                    }
             }
             /* Loop through the number of rows and columns we've defined above
              * and, using the rowImages array, draw the correct image for that
@@ -157,15 +160,6 @@ var Engine = (function(global) {
                      */
                     
                     if (rowImages[row] === 'images/water-block.png') {
-                        /*var water = ctx.getImageData(col * 101, row * 83 + 50, Resources.get(rowImages[row]).width, Resources.get(rowImages[row]).height - 50);
-                        for (var w = 3; w < water.data.length; w += 4) {
-                            if (water.data[w] > 100) {
-                                //console.log(w+' '+water.data[w]);
-                                water.data[w] = 50;
-                            }
-                        }
-                        ctx.putImageData(water, col * 101, row * 83 + 50);
-                        water = [];*/
                         ctx.save();
                         ctx.globalAlpha = 0.5;
                         ctx.drawImage(Resources.get(rowImages[row]), 0, 50, 
