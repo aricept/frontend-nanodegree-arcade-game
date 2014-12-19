@@ -48,7 +48,8 @@ var Enemy = function(x,y,speed) {
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
     this.y = ROW_Y[y];
-    this.row = y++;
+    this.row = y;
+    this.row++;
     this.speed = speed;
     this.x = x;
 };
