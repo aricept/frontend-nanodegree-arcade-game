@@ -3,7 +3,7 @@
 
 var ROW_Y = [60, 140, 220, 300, 380]; //Row positions for enemy bugs
 var NPC_Y = {
-    lvl1: 60,
+    lvl1: -35,
     lvl2: -35
 };
 var START = { //Starting position for player
@@ -25,6 +25,7 @@ START.lvl2.x = START.lvl2.col[START.lvl2.colPos] * 101;
 var enemyMax = 4;
 var win = false; //Triggers game won animation
 var play = false; //Flag used to load character selector or start game
+var selector;
 var selectedChar; //Used as pointer for the selected sprite URL in array
 var chars = [
     'images/char-boy.png',
@@ -47,7 +48,7 @@ var Enemy = function(x,y,speed) {
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
     this.y = ROW_Y[y];
-    this.row = y;
+    this.row = y++;
     this.speed = speed;
     this.x = x;
 };
@@ -188,14 +189,16 @@ Player.prototype.update = function() {
 	}
     this.collide(prev);
     this.dir = '';
+    if (win) {
+        this.row
+    }
 };
 
 Player.prototype.render = function() {
-    //this.sprite = chars[selectedChar];
     switch (level) {
         case 1:
             if(!win && this.row === 0) {
-                ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 60, this.x, this.y + 95, 101, 60);
+                ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
             }
             if (!win && this.row > 0) {
                 ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -206,19 +209,33 @@ Player.prototype.render = function() {
             break;
         case 2:
             if (!win && this.row > 0 && this.row < 5) {
-                ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 60, this.x, this.y + 90, 101, 60);
+                ctx.drawImage(Resources.get(this.sprite), this.x, this.y + 30);
             }
             if (!win && (this.row === 5 || this.row === 0)) {
                 ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
             }
             if (win) {
+                this.row = START.lvl2.row;
                 winning();
             }
             break;
     }
 };
 
-
+Player.prototype.halfRender = function() {
+    switch (level) {
+        case 1:
+            if(!win && this.row === 0) {
+                ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 60, this.x, this.y + 50, 101, 60);
+            }
+            break;
+        case 2:
+            if (!win && this.row > 0 && this.row < 5) {
+                ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 60, this.x, this.y + 80, 101, 60);
+            }
+            break;
+    }
+}
 
 Player.prototype.handleInput = function(dir) {
     if (win === true && level === 1) {
@@ -226,6 +243,8 @@ Player.prototype.handleInput = function(dir) {
         gameReset();
     }
     if (win === true && level === 2) {
+        play = false;
+        initLoad();
         level--;
         gameReset();
     }
@@ -249,11 +268,25 @@ var Nonplayer = function(col, row, sprite) {
     this.interact = false;
     this.speech = [''];
     this.distress = false;
-	this.approach = false;
+    this.bob = 'down';
 
 };
 
 Nonplayer.prototype.update = function() {
+    if (this.distress) {
+        if (level === 1) {
+            if (this.bob === 'down' && this.y < -25) {
+                this.y += 0.15;
+            }
+            else {
+                this.bob = 'up';
+                this.y -= 0.15;
+                if (this.bob === 'up' && this.y < -35) {
+                    this.bob = 'down';
+                }
+            }
+        }
+    }
     if (this.rescued) {
         this.row = player.row;
         this.col = player.col;
@@ -293,18 +326,20 @@ Nonplayer.prototype.update = function() {
 
 Nonplayer.prototype.render = function() {
     if (this.distress) {
-        if (level === 1) {
-            ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 60, this.x, this.y, 101, 60);
-        }
-        else {
-            ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-        }
+        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
     else if (this.rescued) {
         ctx.drawImage(Resources.get(this.sprite), 0, 0, 101, 171, player.x, player.y + 20, 50, 85);
     }
     else {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    }
+}
+
+Nonplayer.prototype.halfRender = function() {
+    if (level === 1 && this.row === 0) {
+        bobY = this.y - NPC_Y.lvl2;
+        ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 70 - bobY, this.x, this.y + 50, 101, 70 - bobY);
     }
 }
 
@@ -320,6 +355,8 @@ var Selector = function() {
     this.realx = this.x * 101;
     this.y = 208;
     this.sprite = 'images/Selector.png';
+    this.alpha = 1;
+    this.throbdir = 'down';
 };
 
 Selector.prototype.handleInput = function(key) {
@@ -348,7 +385,20 @@ Selector.prototype.handleInput = function(key) {
 };
 
 Selector.prototype.render = function() {
+    ctx.save();
+    if (this.alpha > 0.5 && this.throbdir === 'down') {
+        this.alpha -= 0.0075;
+    }
+    else {
+        this.throbdir = 'up';
+        this.alpha += 0.0075;
+        if (this.alpha > 1 && this.throbdir === 'up') {
+            this.throbdir = 'down';
+        }
+    }
+    ctx.globalAlpha = this.alpha;
     ctx.drawImage(Resources.get(this.sprite), this.realx, this.y);
+    ctx.restore();
 };
 
 // Now instantiate your objects.
@@ -364,7 +414,7 @@ var npc = [];
 function gameReset() {
     allEnemies = [];
     npc = [];
-    (level === 2) ? enemyMax = 6 : enemyMax = 4;
+    enemyMax = (level === 2) ? 6 : 4;
     for (i=0; i < enemyMax; i++) {
         var x = 0;
         var y = (level === 2) ? randomize(0,3) : randomize(0,2);

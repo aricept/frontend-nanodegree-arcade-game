@@ -125,6 +125,14 @@ var Engine = (function(global) {
                     numRows = 6,
                     numCols = 5,
                     row, col;
+                    if (player.row === 0) {
+                        player.render();
+                    }
+                    npc.forEach(function(npc) {
+                        if (npc.distress) {
+                            npc.render();
+                        }
+                    });
             }
             if (level === 2) {
                 var rowImages = [
@@ -139,8 +147,8 @@ var Engine = (function(global) {
                     numCols = 5,
                     row, col;
                     allEnemies.forEach(function(enemy) {
-                        enemy.render();
-                    });
+                            enemy.render();
+                        });
                     if (player.row > 0 && player.row < 5) {
                         player.render();
                     }
@@ -150,6 +158,11 @@ var Engine = (function(global) {
              * portion of the "grid"
              */
             for (row = 0; row < numRows; row++) {
+                allEnemies.forEach(function(enemy) {
+                            if (row === 1 && enemy.row === 1) {
+                                enemy.render();
+                            }
+                        });
                 for (col = 0; col < numCols; col++) {
                     /* The drawImage function of the canvas' context element
                      * requires 3 parameters: the image to draw, the x coordinate
@@ -158,10 +171,9 @@ var Engine = (function(global) {
                      * so that we get the benefits of caching these images, since
                      * we're using them over and over.
                      */
-                    
                     if (rowImages[row] === 'images/water-block.png') {
                         ctx.save();
-                        ctx.globalAlpha = 0.5;
+                        ctx.globalAlpha = 0.8;
                         ctx.drawImage(Resources.get(rowImages[row]), 0, 50, 
                             Resources.get(rowImages[row]).width,
                             Resources.get(rowImages[row]).height - 86,
@@ -197,9 +209,25 @@ var Engine = (function(global) {
             });
         }
         npc.forEach(function(npc) {
-            npc.render();
+            switch(level) {
+                case 1:
+                    if (!npc.distress) {
+                        npc.render();
+                    }
+                    if (npc.distress) {
+                        npc.halfRender();
+                    }
+                    break;
+                case 2:
+                    npc.render();
+                    break;
+            }
         });
-		player.render();
+        if (win === true || (level === 1 && player.row !== 0) || (level === 2 && (player.row === 0 || player.row === 5))) {
+		    player.render();
+        }
+        player.halfRender();
+
 
         
     }
