@@ -376,6 +376,13 @@ Selector.prototype.handleInput = function(key) {
 
 Selector.prototype.render = function() {
     ctx.save();
+    this.throb();
+    ctx.globalAlpha = this.alpha;
+    ctx.drawImage(Resources.get(this.sprite), this.realx, this.y);
+    ctx.restore();
+};
+
+Selector.prototype.throb = function() {
     if (this.alpha > 0.5 && this.throbdir === 'down') {
         this.alpha -= 0.0075;
     }
@@ -386,10 +393,7 @@ Selector.prototype.render = function() {
             this.throbdir = 'down';
         }
     }
-    ctx.globalAlpha = this.alpha;
-    ctx.drawImage(Resources.get(this.sprite), this.realx, this.y);
-    ctx.restore();
-};
+}
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
