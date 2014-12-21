@@ -124,7 +124,7 @@ Player.prototype.collide = function(prev) {
                     player.x = START.lvl2.x;
                     player.y = START.lvl2.y;
                     player.row = START.lvl2.row;
-                    player.col = START.lvl2.col[START.lvl2.colPos];
+                    player.col = START.lvl2.col[0];
                     break;
             }
             for (var i = 0; i < npc.length; i++) {
@@ -307,15 +307,9 @@ Nonplayer.prototype.update = function() {
 				this.rescued = false;
 				player.dir = '';
 				count = 0;
-                if (level === 2 && this.col === START.lvl2.col[START.lvl2.colPos]) {
-                    START.lvl2.colPos++;
-                    START.lvl2.x = START.lvl2.col[START.lvl2.colPos] * 101;
-                    for (var n = 0; n < npc.length; n++) {
-                        if (START.lvl2.col[START.lvl2.colPos] === npc[n].col) {
-                            START.lvl2.colPos++;
-                            START.lvl2.x = START.lvl2.col[START.lvl2.colPos] * 101;
-                        }
-                    }
+                if (level === 2) {
+                    START.lvl2.col.splice(START.lvl2.col.indexOf(this.col), 1);
+                    START.lvl2.x = START.lvl2.col[0] * 101;
                 }
 				if (npc.length + 1 === chars.length) {
 					win = true;
