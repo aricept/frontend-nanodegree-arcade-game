@@ -2,21 +2,18 @@
 /*Variables and Constants*/
 
 var ROW_Y = [60, 140, 220, 300, 380]; //Row positions for enemy bugs
-var NPC_Y = {
-    lvl1: -35,
-    lvl2: -35
-};
+var NPC_Y = -35;
 var START = { //Starting position for player
     lvl1: {
-        x: 202,
+        x: 303,
         y: 297,
         row: 4,
-        col: 2
+        col: 3
     },
     lvl2: {
         y: 380,
         row: 5,
-        col: [2, 1, 0, 3, 4],
+        col: [3, 2, 4, 1, 5],
         colPos: 0,
         x: 0
     }
@@ -41,15 +38,9 @@ var level = 1;
 
 
 var Enemy = function(x,y,speed) {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
-
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
     this.y = ROW_Y[y];
-    this.row = y;
-    this.row++;
+    this.row = y + 1;
     this.speed = speed;
     this.x = x;
 };
@@ -57,9 +48,6 @@ var Enemy = function(x,y,speed) {
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
     
     //When bugs leave the screen on the right, they are redrawn off screen left
     if (this.x < ctx.canvas.width) {
@@ -79,10 +67,16 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+Enemy.prototype.left = function() {
+    var left = this.x;
+    return left;
+}
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
+Enemy.prototype.right = function() {
+    var right = this.x + 100;
+    return right;
+}
+
 
 //The row properties for player and enemy are used to abstract collisions
 var Player = function() {
@@ -104,10 +98,20 @@ var Player = function() {
     
 };
 
+Player.prototype.left = function() {
+    var left = this.x + 35;
+    return left;
+}
+
+Player.prototype.right = function() {
+    var right = this.x + 70;
+    return right;
+}
+
 //Collision detection method on player
 Player.prototype.collide = function(prev) {
     for (enemy in allEnemies) {
-        if (allEnemies[enemy].x + 100 > this.x + 50 && allEnemies[enemy].x < this.x + 50 && this.row === allEnemies[enemy].row) {
+        if (allEnemies[enemy].right() > this.left() && allEnemies[enemy].left() < this.right() && this.row === allEnemies[enemy].row) {
             switch (level) {
                 case 1:
                     player.x = START.lvl1.x;
@@ -126,16 +130,9 @@ Player.prototype.collide = function(prev) {
             for (var i = 0; i < npc.length; i++) {
                 if (npc[i].rescued) {
                     npc[i].row = 0;
-                    npc[i].col = randomize(0,3);
+                    npc[i].col = randomize(0,6);
                     npc[i].x = npc[i].col * 101;
-                    switch (level) {
-                        case 1:
-                            npc[i].y = NPC_Y.lvl1;
-                            break;
-                        case 2:
-                            npc[i].y = NPC_Y.lvl2;
-                            break;
-                    }
+                    npc[i].y = NPC_Y;
                     npc[i].distress = true;
                     npc[i].rescued = false;
                 }
@@ -150,7 +147,7 @@ Player.prototype.collide = function(prev) {
                 player.row = prev.row;
                 player.col = prev.col;
                 player.dir='';
-                npc[np].collide(prev);
+                npc[np].collide();
 			}
         }
     }
@@ -166,7 +163,7 @@ Player.prototype.update = function() {
 			}
 			break;
 		case 'right':
-			if (this.x < 400) {
+			if (this.x < ctx.canvas.width - 200) {
 				this.x = this.x + 101;
 				this.col++;
 			}
@@ -190,18 +187,15 @@ Player.prototype.update = function() {
 	}
     this.collide(prev);
     this.dir = '';
-    if (win) {
-        this.row
-    }
 };
 
 Player.prototype.render = function() {
     switch (level) {
         case 1:
-            if(!win && this.row === 0) {
+            /*if(!win && this.row === 0) {
                 ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-            }
-            if (!win && this.row > 0) {
+            }*/
+            if (!win) {
                 ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
             }
         	if (win) {
@@ -224,15 +218,17 @@ Player.prototype.render = function() {
 };
 
 Player.prototype.halfRender = function() {
+    var sprite = Resources.get(this.sprite);
+    var face = 50;
     switch (level) {
         case 1:
             if(!win && this.row === 0) {
-                ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 60, this.x, this.y + 50, 101, 60);
+                ctx.drawImage(Resources.get(this.sprite), 0, face, sprite.width, 60, this.x, this.y + face, 101, 60);
             }
             break;
         case 2:
             if (!win && this.row > 0 && this.row < 5) {
-                ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 60, this.x, this.y + 80, 101, 60);
+                ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 60, this.x, this.y + face + 30, 101, 60);
             }
             break;
     }
@@ -259,31 +255,36 @@ var Nonplayer = function(col, row, sprite) {
     this.col = col;
     this.x = this.col * 101;
     if (level === 1) {
-        this.y = NPC_Y.lvl1;
+        this.y = NPC_Y;
     }
     if (level === 2) {
-        this.y = NPC_Y.lvl2;
+        this.y = NPC_Y;
     }
     this.sprite = chars[sprite];
     this.rescued = false;
     this.interact = false;
     this.speech = [''];
     this.distress = false;
-    this.bob = 'down';
+    this.bob = {
+        dir: 'down',
+        top: -35,
+        bottom: -25,
+        move: 0.15
+    };
 
 };
 
 Nonplayer.prototype.update = function() {
     if (this.distress) {
         if (level === 1) {
-            if (this.bob === 'down' && this.y < -25) {
-                this.y += 0.15;
+            if (this.bob.dir === 'down' && this.y < this.bob.bottom) {
+                this.y += this.bob.move;
             }
             else {
-                this.bob = 'up';
-                this.y -= 0.15;
-                if (this.bob === 'up' && this.y < -35) {
-                    this.bob = 'down';
+                this.bob.dir = 'up';
+                this.y -= this.bob.move;
+                if (this.bob.dir === 'up' && this.y < this.bob.top) {
+                    this.bob.dir = 'down';
                 }
             }
         }
@@ -321,7 +322,7 @@ Nonplayer.prototype.update = function() {
 				}
 				npcGenerate(1);
 			}
-		}	
+		}
 	}
 };
 
@@ -339,13 +340,13 @@ Nonplayer.prototype.render = function() {
 
 Nonplayer.prototype.halfRender = function() {
     if (level === 1 && this.row === 0) {
-        bobY = this.y - NPC_Y.lvl2;
+        bobY = this.y - NPC_Y;
         ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 70 - bobY, this.x, this.y + 50, 101, 70 - bobY);
     }
 }
 
-Nonplayer.prototype.collide = function(prev) {
-	if (this.distress === true) {
+Nonplayer.prototype.collide = function() {
+    if (this.distress === true) {
 		this.rescued = true;
 	}
 	this.distress = false;
@@ -353,7 +354,7 @@ Nonplayer.prototype.collide = function(prev) {
 
 var Selector = function() {
     this.x = 0;
-    this.realx = this.x * 101;
+    this.realx = this.x * 101 + 101;
     this.y = 208;
     this.sprite = 'images/Selector.png';
     this.alpha = 1;
@@ -363,16 +364,10 @@ var Selector = function() {
 Selector.prototype.handleInput = function(key) {
     switch(key) {
         case 'left':
-            if (selector.x > 0) {
-                selector.x--;
-                selector.realx = this.x * 101;
-            }
+            selector.x > 0 ? (selector.x--, selector.realx = this.x * 101 + 101) : selector.x;
             break;
         case 'right':
-            if (selector.x < 4) {
-                selector.x++;
-                selector.realx = this.x * 101;
-            }
+            selector.x < 4 ? (selector.x++, selector.realx = this.x * 101 + 101) : selector.x;
             break;
         case 'enter':
             selectedChar = selector.x;
@@ -406,7 +401,7 @@ Selector.prototype.render = function() {
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 
-var player = new Player;
+var player;
 var selector;
 var allEnemies = [];
 var npc = [];
@@ -426,7 +421,7 @@ function gameReset() {
     player.sprite = chars[selectedChar];
 	friends = chars.slice(0);
 	friends.splice(friends.indexOf(player.sprite),1);
-	npcGenerate(1,friends);
+	npcGenerate(1);
     win = false;
 }
 
@@ -435,7 +430,7 @@ function npcGenerate(lvl) {
 		case 1 || 2:
 			if (npc.length - 1 < chars.length-2) {
 				newFriend = friends.pop();
-				npc.push(new Nonplayer(randomize(0,4),0,chars.indexOf(newFriend)));
+				npc.push(new Nonplayer(randomize(0,6),0,chars.indexOf(newFriend)));
 				npc[npc.length-1].distress = true;
 			}
 			break;
@@ -446,21 +441,21 @@ function winning() {
     win = true;
     allEnemies=[];
     var time = new Date().getTime() * 0.002;
-    var x = Math.sin( time ) * 96 + 200;
+    var x = Math.sin( time ) * 96 + 350;
     var y = Math.cos( time * 0.9 ) * 96 + 200;
     if (level === 1) {
         ctx.drawImage(Resources.get(player.sprite), x, y);
         ctx.fillStyle = 'gold';
         ctx.font = 'bold 34pt Times New Roman';
         ctx.textAlign = 'center';
-        ctx.fillText('CONGRATULATIONS!', 250, 303);
+        ctx.fillText('CONGRATULATIONS!', ctx.canvas.width/2, 303);
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 2;
-        ctx.strokeText('CONGRATULATIONS!', 250, 303);
+        ctx.strokeText('CONGRATULATIONS!', ctx.canvas.width/2, 303);
         ctx.font = 'bold 20pt Times New Roman';
-        ctx.fillText('Press an Arrow to Continue', 250, 450);
+        ctx.fillText('Press an Arrow to Continue', ctx.canvas.width/2, 450);
         ctx.lineWidth = 1;
-        ctx.strokeText('Press an Arrow to Continue', 250, 450);
+        ctx.strokeText('Press an Arrow to Continue', ctx.canvas.width/2, 450);
         ctx.stroke();
     }
     if (level === 2) {
@@ -469,14 +464,14 @@ function winning() {
         ctx.fillStyle = 'gold';
         ctx.font = 'bold 34pt Times New Roman';
         ctx.textAlign = 'center';
-        ctx.fillText('CONGRATULATIONS!', 250, 303);
+        ctx.fillText('CONGRATULATIONS!', ctx.canvas.width/2, 303);
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 2;
-        ctx.strokeText('CONGRATULATIONS!', 250, 303);
+        ctx.strokeText('CONGRATULATIONS!', ctx.canvas.width/2, 303);
         ctx.font = 'bold 20pt Times New Roman';
-        ctx.fillText('Press an Arrow to Play Again', 250, 450);
+        ctx.fillText('Press an Arrow to Play Again', ctx.canvas.width/2, 450);
         ctx.lineWidth = 1;
-        ctx.strokeText('Press an Arrow to Play Again', 250, 450);
+        ctx.strokeText('Press an Arrow to Play Again', ctx.canvas.width/2, 450);
         ctx.stroke();
     }
     

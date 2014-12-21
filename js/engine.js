@@ -25,7 +25,7 @@ var Engine = (function(global) {
         ctx = canvas.getContext('2d'),
         lastTime;
 
-    canvas.width = 505;
+    canvas.width = 707;
     canvas.height = 606;
     doc.body.appendChild(canvas);
 
@@ -65,7 +65,7 @@ var Engine = (function(global) {
      */
     function init() {
         reset();
-		initLoad();
+		initLoad  ();
         lastTime = Date.now();
         main();
     }
@@ -92,13 +92,15 @@ var Engine = (function(global) {
      * render methods.
      */
     function updateEntities(dt) {
-        allEnemies.forEach(function(enemy) {
-            enemy.update(dt);
-        });
-        npc.forEach(function(npc) {
-            npc.update(dt);
-        });
-		player.update();
+        if (play === true) {
+            allEnemies.forEach(function(enemy) {
+                enemy.update(dt);
+            });
+            npc.forEach(function(npc) {
+                npc.update(dt);
+            });
+    		player.update();
+        }
     }
 
     /* This function initially draws the "game level", it will then call
@@ -123,7 +125,7 @@ var Engine = (function(global) {
                         'images/grass-block.png'    // Row 2 of 2 of grass
                     ],
                     numRows = 6,
-                    numCols = 5,
+                    numCols = 7,
                     row, col;
                     if (player.row === 0) {
                         player.render();
@@ -144,7 +146,7 @@ var Engine = (function(global) {
                         'images/stone-block.png'    // Mainland edge
                     ],
                     numRows = 6,
-                    numCols = 5,
+                    numCols = 7,
                     row, col;
                     allEnemies.forEach(function(enemy) {
                             enemy.render();
@@ -190,9 +192,9 @@ var Engine = (function(global) {
 
             renderEntities();
 		}
-		else {
-			loadRender();
-		}
+        else {
+            loadRender();
+        }
     }
 
     /* This function is called by the render function and is called on each game
@@ -235,11 +237,11 @@ var Engine = (function(global) {
 	function loadRender() {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		for (col = 0; col <5; col++) {
-				ctx.drawImage(Resources.get("images/stone-block.png"), col * 101, 249);
+				ctx.drawImage(Resources.get("images/stone-block.png"), col * 101 + 101, 249);
 			}
 		selector.render();
 		for (var i = 0; i < chars.length; i++) {
-			ctx.drawImage(Resources.get(chars[i]), i * 101, 215);
+			ctx.drawImage(Resources.get(chars[i]), i * 101 + 101, 215);
 		}
 	}
 
