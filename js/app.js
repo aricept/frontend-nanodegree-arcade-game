@@ -150,12 +150,7 @@ Player.prototype.collide = function(prev) {
             //If the player is carrying an NPC, the NPC is placed in distress
             for (var i = 0; i < npc.length; i++) {
                 if (npc[i].rescued) {
-                    npc[i].row = 0;
-                    npc[i].col = randomize(0,6);
-                    npc[i].x = npc[i].col * 101;
-                    npc[i].y = NPC_Y;
-                    npc[i].distress = true;
-                    npc[i].rescued = false;
+                    npc[i].collide();
                 }
             }
         }
@@ -163,12 +158,12 @@ Player.prototype.collide = function(prev) {
     //Player and NPC cannot occupy a space, so collision pushes player back
     if (npc.length > 0) {
         for (var np = 0; np < npc.length; np++) {
-            if (this.col === npc[np].col && this.row === npc[np].row) {
-                player.x = prev.x;
-                player.y = prev.y;
-                player.row = prev.row;
-                player.col = prev.col;
-                player.dir='';
+            if (this.col === npc[np].col && this.row === npc[np].row && !npc[np].rescued) {
+                this.x = prev.x;
+                this.y = prev.y;
+                this.row = prev.row;
+                this.col = prev.col;
+                this.dir='';
                 npc[np].collide();
 			}
         }
@@ -377,7 +372,7 @@ Nonplayer.prototype.render = function() {
     else {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
-}
+};
 
 //Renders the above water portion of NPC for bob motion
 Nonplayer.prototype.halfRender = function() {
@@ -385,15 +380,23 @@ Nonplayer.prototype.halfRender = function() {
         bobY = this.y - NPC_Y; // The above-water portion changes during the bob
         ctx.drawImage(Resources.get(this.sprite), 0, 50, 101, 70 - bobY, this.x, this.y + 50, 101, 70 - bobY);
     }
-}
+};
 
 // Nonplayer collide
 Nonplayer.prototype.collide = function() {
     if (this.distress === true) {
 		this.rescued = true;
+        this.distress = false;
 	}
-	this.distress = false;
-}
+	else if (this.rescued) {
+        this.row = 0;
+        this.col = randomize(0,6);
+        this.x = this.col * 101;
+        this.y = NPC_Y;
+        this.distress = true;
+        this.rescued = false;
+    }
+};
 
 // ---------- Selector Class ---------- \\
 
