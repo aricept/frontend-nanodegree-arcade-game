@@ -148,9 +148,13 @@ var Engine = (function(global) {
                     numRows = 6,
                     numCols = 7,
                     row, col;
+                    // Render all enemies not on top row of water
                     allEnemies.forEach(function(enemy) {
-                            enemy.render();
+                            if (enemy.row !== 1) {
+                                enemy.render();
+                            }
                         });
+                    // Render player when in water; player is rendered before water, so appears "under" water
                     if (player.row > 0 && player.row < 5) {
                         player.render();
                     }
@@ -160,6 +164,11 @@ var Engine = (function(global) {
              * portion of the "grid"
              */
             for (row = 0; row < numRows; row++) {
+                /* We want to render enemies underwater only after water blocks.
+                 * If we do not run this check, land blocks render before and
+                 * as they are not transparent, partially obscures enemies on
+                 * top row of water
+                 */
                 allEnemies.forEach(function(enemy) {
                             if (row === 1 && enemy.row === 1) {
                                 enemy.render();
@@ -174,9 +183,13 @@ var Engine = (function(global) {
                      * we're using them over and over.
                      */
                     if (rowImages[row] === 'images/water-block.png') {
+                        /* If we are drawing water, we will shift the transparency slightly
+                         * In addition, because the block "edge" destroys the transparency
+                         * effect, we will draw only the "surface" portion of the block
+                         */
                         ctx.save();
                         ctx.globalAlpha = 0.8;
-                        ctx.drawImage(Resources.get(rowImages[row]), 0, 50, 
+                        ctx.drawImage(Resources.get(rowImages[row]), 0, 50,
                             Resources.get(rowImages[row]).width,
                             Resources.get(rowImages[row]).height - 86,
                             col * 101, row * 83 + 50,
@@ -210,6 +223,7 @@ var Engine = (function(global) {
                 enemy.render();
             });
         }
+        // Loop through NPCs, and render a method depending on level and state
         npc.forEach(function(npc) {
             switch(level) {
                 case 1:
@@ -231,30 +245,31 @@ var Engine = (function(global) {
         player.halfRender();
 
 
-        
+
     }
-	
+
 	function loadRender() {
+        // Renders our load screen
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		for (col = 0; col <5; col++) {
+        for (col = 0; col <5; col++) {
 				ctx.drawImage(Resources.get("images/stone-block.png"), col * 101 + 101, 249);
 			}
 		selector.render();
 		for (var i = 0; i < chars.length; i++) {
 			ctx.drawImage(Resources.get(chars[i]), i * 101 + 101, 215);
 		}
-	}
+    }
 
     /* This function does nothing but it could have been a good place to
      * handle game reset states - maybe a new game menu or a game over screen
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
- 
+
 	}
-	
-	
-    
+
+
+
 
     /* Go ahead and load all of the images we know we're going to need to
      * draw our game level. Then set init as the callback method, so that when
